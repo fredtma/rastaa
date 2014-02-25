@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" ng-app='rastaa'>
+	<head>
+		<title>Rastaa System</title>
+      <meta charset="utf-8" />
+      <meta name="format-detection" content="telephone=no" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="mobile-web-app-capable" content="yes">
+      <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+      <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+<!--      <link rel="shortcut icon" href="img/fav.png" />
+      <link rel="apple-touch-icon" href="res/icon/android/icon-36-ldpi.png"/>
+      <link rel="apple-touch-startup-image" href="res/screen/android/screen-mdpi-portrait.png">
+      <link rel="shortcut icon" sizes="196x196" href="res/screen/android/screen-mdpi-landscape.png">
+      <link rel="shortcut icon" sizes="128x128" href="res/icon/android/icon-36-ldpi.png">      -->
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+      <link rel="stylesheet" href="css/skel-noscript.css" />
+      <link rel="stylesheet" href="css/style.css" />
+      <link rel="stylesheet" href="css/style-wide.css" />
+      <link rel="stylesheet" href="css/index.css" />
+	</head>
+	<body>
+		<!-- Header -->
+			<div id="header" class="skel-panels-fixed">
+				<div class="top">
+               <div id="logo" ng-if="usr">
+                  <span class="image avatar48"><img ng-src="{{usr.img}}" alt="Admin profile logo" /></span>
+                  <h1 id="title">{{usr.display}}</h1><span class="byline">{{usr.title}}</span>
+               </div>
+               <nav id="nav" class="navLeft">
+                  <ul><li ng-repeat="menu in menus"><a ng-href="{{menu.link}}" id="{{menu.id}}-link" title="{{menu.text}}"><span class="fa {{menu.span}}" >{{menu.text}}</span></a></li></ul>
+               </nav>
+				</div>
+				<div class="bottom">
+               <ul class="icons">
+                  <li ng-repeat="icon in icons"><a href="{{icon.link}}" class="fa {{icon.class}} solo"><span>{{icon.text}}</span></a></li>
+               </ul>
+				</div>
+			</div>
+         <section id="father" class="container-fluid slide-animate-container">
+            <header ng-if="breadcrum" class="menuHeader">
+               <ol class="breadcrumb">
+                  <li><a href="#genesis">Home</a></li>
+                  <li ng-repeat="bread in breadcrum" class="{{bread.class}}"><a ng-if="bread.link" href="{{bread.link}}">{{bread.text}}</a><span  ng-if="!bread.link">{{bread.text}}</span></li>
+               </ol>
+               <a ng-if="crud.alpha" ng-href="{{crud.alpha}}" class="crud1 fa fa-plus success"></a>
+               <a ng-if="crud.omega" ng-href="#" ng-click="delete()" class="crud0 fa fa-minus danger"></a>
+            </header>
+            <article id="main" class="slide-animate" ng-view></article>
+         </section>
+			<div id="footer" class="navbar navbar-fixed-bottom navbar-inverse navbar-static">
+				<!-- Copyright -->
+					<div class="copyright">
+						<ul class="menu">
+                     <li id='notification'><span>...</span></li>
+							<li ng-repeat="foot in footer">{{foot.text}} <a href="{{foot.link}}">{{foot.title}}</a></li>
+						</ul>
+					</div>
+			</div>
+      <script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
+      <script type="text/javascript" src="lib/bootstrap/bootstrap.min.js"></script>
+      <script type="text/javascript" src="js/lib.muneris.js"></script>
+      <script type="text/javascript" src="js/lib.consuetudinem.js"></script>
+      <script type="text/javascript" src="lib/angular/angular.min.js"></script>
+      <script type="text/javascript" src="lib/angular/angular-route.min.js"></script>
+      <script type="text/javascript" src="lib/angular/angular-animate.min.js"></script>
+      <script type="text/javascript" src="lib/angular/angular-sanitize.min.js"></script>
+      <script type="text/javascript" src="lib/angular/angular-resource.min.js"></script>
+      <script type="text/javascript" src="js/app.js"></script>
+      <script type="text/javascript" src="js/app.controllers.js"></script>
+      <script type="text/javascript" src="js/app.services.js"></script>
+      <script type="text/javascript" src="js/app.filters.js"></script>
+	</body>
+</html>

@@ -1,0 +1,30 @@
+/******************************************************************************/
+/*TAGS*/
+html,body{height:100%;margin:0px;padding:0px;width:100%;}
+a:hover{text-decoration: none;}
+small{font-size: 0.55em;}
+/******************************************************************************/
+/*CLASSES*/
+.slide-animate-container {position:relative;overflow:hidden;border:0px solid black;}
+.slide-animate {}
+.slide-animate.ng-enter, .slide-animate.ng-leave {transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;-webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;
+  position:absolute;top:0;left:0;right:0;bottom:0;display:block;}
+.slide-animate.ng-enter {top:-100%;}
+.slide-animate.ng-enter.ng-enter-active {top:0;}
+.slide-animate.ng-leave {top:0;}
+.slide-animate.ng-leave.ng-leave-active {top:100%;}
+.width50 {width: 50% !important;}
+/******************************************************************************/
+/*NAV*/
+.navLeft a:hover{background:#fff;color: #000 !important;}.navLeft a{display:block;}
+/******************************************************************************/
+/*HEADER*/
+.breadcrumb li {color: #C7CCD0} .breadcrumb li.active {color: #ffffff;}
+.breadcrumb{ margin-bottom:0px; box-shadow: 0px 2px 5px rgba(100,100,100,0.5); font-size: 0.8em; position: relative;}
+.breadcrumb a{color:#000;}.breadcrumb a:hover{color:#d9534f;}
+.crud1,.crud0{position:absolute; right:10px; top: 0;color: teal;font-size:  0.8em;/* border: 1px solid red; */}
+.crud0{right: 50px;color: #d9534f;}
+/******************************************************************************/
+/*MAIN*/
+#father {margin: 0 0 0 250px;min-height: 40em;}
+#userForm{padding-top: 1px;}
