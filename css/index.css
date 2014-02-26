@@ -23,7 +23,7 @@ small{font-size: 0.55em;}
 .breadcrumb{ margin-bottom:0px; box-shadow: 0px 2px 5px rgba(100,100,100,0.5); font-size: 0.8em; position: relative;}
 .breadcrumb a{color:#000;}.breadcrumb a:hover{color:#d9534f;}
 .crud1,.crud0{position:absolute; right:10px; top: 0;color: teal;font-size:  0.8em;/* border: 1px solid red; */}
-.crud0{right: 50px;color: #d9534f;}
+.crud0{right: 50px;color: #d9534f;}.bread-span{color:#999;}
 /******************************************************************************/
 /*MAIN*/
 #father {margin: 0 0 0 250px;min-height: 40em;}

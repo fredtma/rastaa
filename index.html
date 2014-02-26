@@ -24,8 +24,10 @@
 			<div id="header" class="skel-panels-fixed">
 				<div class="top">
                <div id="logo" ng-if="usr">
+                  <a href="{{usr.link}}">
                   <span class="image avatar48"><img ng-src="{{usr.img}}" alt="Admin profile logo" /></span>
                   <h1 id="title">{{usr.display}}</h1><span class="byline">{{usr.title}}</span>
+                  </a>
                </div>
                <nav id="nav" class="navLeft">
                   <ul><li ng-repeat="menu in menus"><a ng-href="{{menu.link}}" id="{{menu.id}}-link" title="{{menu.text}}"><span class="fa {{menu.span}}" >{{menu.text}}</span></a></li></ul>
@@ -40,8 +42,8 @@
          <section id="father" class="container-fluid slide-animate-container">
             <header ng-if="breadcrum" class="menuHeader">
                <ol class="breadcrumb">
-                  <li><a href="#genesis">Home</a></li>
-                  <li ng-repeat="bread in breadcrum" class="{{bread.class}}"><a ng-if="bread.link" href="{{bread.link}}">{{bread.text}}</a><span  ng-if="!bread.link">{{bread.text}}</span></li>
+                  <li ng-if="breadcrum[0]!==false"><a href="#genesis">Home</a></li>
+                  <li ng-repeat="bread in breadcrum" ng-if="bread!==false" class="{{bread.class}}"><a ng-if="bread.link" href="{{bread.link}}">{{bread.text}}</a><span class="bread-span"  ng-if="!bread.link">{{bread.text}}</span></li>
                </ol>
                <a ng-if="crud.alpha" ng-href="{{crud.alpha}}" class="crud1 fa fa-plus success"></a>
                <a ng-if="crud.omega" ng-href="#" ng-click="delete()" class="crud0 fa fa-minus danger"></a>

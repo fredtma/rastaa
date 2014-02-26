@@ -1,6 +1,5 @@
 <article  ng-controller="usersCtrl">
    <section id="listView" ng-if="view=='list'">
-      <header class="menuHeader"><ol class="breadcrumb"><li><a href="#genesis">Home</a></li><li class="active">{{menu.list[0].name}}</li></ol><a ng-if="licentia.Alpha" ng-href="{{menu.list[0].url}}" class="glyphicon glyphicon-plus success"></a></header>
       <section id="mainContent" class="div-striped-">
          <div class="row numbers-items" ng-repeat="row in data">
             <div class="col-xs-1">
@@ -63,6 +62,15 @@
                <div class="input-group">
                   <span class="input-group-addon glyphicon glyphicon-phone"></span>
                   <input type="tel" class="form-control" required placeholder="Mobile number" title="Mobile number" name="mobile" ng-model="data.mobile"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="inputEmail3" >Position</label>
+            <div>
+               <div class="input-group">
+                  <span class="input-group-addon glyphicon glyphicon-pushpin"></span>
+                  <input type="text" class="form-control" required placeholder="Job Position" title="Job Position" name="position" ng-model="data.position"  />
                </div>
             </div>
          </div>

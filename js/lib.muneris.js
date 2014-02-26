@@ -60,7 +60,7 @@ dynamis={
 }
 
 //============================================================================//CONFIG
-function configuration(){}
+function configuration(){this.testing=true;}
 configuration.prototype.config=function(){
    sessionStorage.startTime=new Date().getTime();
    sessionStorage.runTime=new Date().getTime();
