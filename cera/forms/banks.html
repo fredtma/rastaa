@@ -1,0 +1,134 @@
+<article  ng-controller="banksCtrl">
+   <section id="listView" ng-if="view=='list'">
+      <section id="mainContent" class="listing">
+         <ul class="list-group profile-listing">
+         <li class=" " ng-repeat="row in data">
+            <div class="cols1">
+               <span ng-class="'item-icon fa fa-money text-danger'"></span>
+            </div>
+            <div class="cols2">
+               <a href="#banks/view/{{row.jesua}}">
+                  <h4>
+                     {{row.name}}
+                  </h4>
+                  <small><span ng-if='row.code'>{{row.code}}, &nbsp;&nbsp;</span> <span ng-if='row.account_number'>{{row.account_number}}.</span></small>
+               </a>
+            </div>
+         </li>
+         </ul>
+      </section>
+   </section>
+   <section id="detailView"  ng-if="view=='new'||view=='view'">
+      <section class=""><span id="messager" ng-class="'help-block '+{true:'text-danger',false:'text-info'}[err]" ng-show="msg">{{msg}}</span>
+         <form id="dataForm" ng-submit="submit(dataForm)" name='dataForm'>
+         <input type="hidden" class="form-control" ng-model="data.jesua" />
+         <input type="hidden" class="form-control" ng-model="data.modified" />
+         <div class="form-group">
+            <label for="supplier_name" >Supplier's Name</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.supplier_name]">
+                  <span class="input-group-addon fa fa-group"></span>
+                  <input type="text" class="form-control" required placeholder="The Supplier Name" title="The Supplier Name" id="supplier_name" name="supplier_name" ng-model="data.supplier_name"  typeahead="value as value.display for value in typeahead.supplier_name | filter:{display:$viewValue} | limitTo:5" autofocus/>
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="name" >Bank's Name</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.name]">
+                  <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
+                  <input type="text" class="form-control" autocomplete="off" required placeholder="Bank's name" id="name" title="Bank's name" name="name" ng-model="data.name" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="code" >Bank Code</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.code]">
+                  <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                  <input type="text" class="form-control" required placeholder="Bank code" title="Bank code" id="code" name="code" ng-model="data.code" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="code" >Swift Code</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.swift]">
+                  <span class="input-group-addon fa fa-tag"></span>
+                  <input type="text" class="form-control" required placeholder="Swift code" title="Swift code" id="swift" name="swift" ng-model="data.swift" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="address" >Address</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.address]">
+                  <span class="input-group-addon fa fa-align-justify"></span>
+                  <textarea type="address" class="form-control" required placeholder="Address" title="Address" id="address" name="address" ng-model="data.address"  /></textarea>
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="account_number" >Account Number</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.account_number]">
+                  <span class="input-group-addon fa fa-book"></span>
+                  <input type="text" class="form-control" required placeholder="Bank Account Number" title="Bank Account Number" id="account_number" name="account_number" ng-model="data.account_number"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="aba" >Bank ABA</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.aba]">
+                  <span class="input-group-addon fa fa-th"></span>
+                  <input type="text" class="form-control" required placeholder="Bank ABA" title="Bank ABA" id="aba" name="aba" ng-model="data.aba"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="aba" >Bank Wire Routing</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.wire_routing]">
+                  <span class="input-group-addon fa fa-exchange"></span>
+                  <input type="text" class="form-control" required placeholder="Bank Wire Routing" title="Bank Wire Routing" id="wire_routing" name="wire_routing" ng-model="data.wire_routing" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="iban" >IBAN</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.iban]">
+                  <span class="input-group-addon fa fa-bar-chart-o"></span>
+                  <input type="text" class="form-control" required placeholder="Bank IBAN" title="Bank IBAN" id="iban" name="iban" ng-model="data.iban" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="country" >Country</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.country]">
+                  <span class="input-group-addon fa fa-flag"></span>
+                  <input type="text" class="form-control" required placeholder="Bank's Original Country" id="country" title="Country From" name="country" ng-model="data.country" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="opt.foreignVal">
+            <h4 class="refSection">{{opt.foreignConf[key].title}}</h4>
+            <div>
+               <div ng-repeat="(key,links) in opt.foreignVal" >
+                  <div id='srvModified' class="input-group btn-group" data-toggle="buttons" ng-init="col1=opt.foreignConf[key].col1;col2=opt.foreignConf[key].col2;parent=data[opt.foreignConf[key].parent];type=opt.foreignConf[key].type;">
+                     <span class="input-group-addon glyphicon glyphicon-book"></span>
+                     <button ng-if="type=='radio'" ng-repeat="(k,link) in links.rows" type="button" class="btn btn-primary" ng-model="link[col1]"  btn-radio="'{{parent}}'" ng-click="DBenum(links,parent,col1,k,'radio');">{{link[col2]}}</button>
+                     <button ng-if="type=='checkbox'" ng-repeat="(k,link) in links.rows" type="button" class="btn btn-primary" ng-model="link[col1]" btn-checkbox btn-checkbox-false="null" btn-checkbox-true="'{{parent}}'" >{{link[col2]}}</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div ng-if="licentia.deLta||data.jesua==prima||true" ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+            <button type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
+         </div>
+         </form>
+      </section><small ng-show="false">{{data|json}} <hr/> {{btnClass|json}} <hr/> {{opt|json}}</small>
+   </section>
+</article>

@@ -1,0 +1,115 @@
+<article  ng-controller="projectsCtrl">
+   <section id="listView" ng-if="view=='list'">
+      <section id="mainContent" class="listing">
+         <ul class="list-group profile-listing">
+         <li class=" " ng-repeat="row in data">
+            <div class="cols1">
+               <span ng-class="'item-icon fa fa-suitcase text-success'"></span>
+            </div>
+            <div class="cols2">
+               <a href="#projects/view/{{row.jesua}}">
+                  <h4>
+                     {{row.name}} - {{project_manger}}
+                  </h4>
+                  <small><span ng-if='row.start_date'>{{row.start_date}}, </span> <span ng-if='row.end_date'>{{row.end_date}}.</span></small>
+               </a>
+            </div>
+         </li>
+         </ul>
+      </section>
+   </section>
+   <section id="detailView"  ng-if="view=='new'||view=='view'">
+      <section class=""><span id="messager" ng-class="'help-block '+{true:'text-danger',false:'text-info'}[err]" ng-show="msg">{{msg}}</span>
+         <form id="dataForm" ng-submit="submit(dataForm)" name='dataForm'>
+         <input type="hidden" class="form-control" ng-model="data.jesua" />
+         <input type="hidden" class="form-control" ng-model="data.modified" />
+         <div class="form-group">
+            <label for="name" >Project Name</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+                  <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
+                  <input type="text" class="form-control" required autocomplete="off" placeholder="Project's name" title="Project's name" autofocus id="name" name="name" ng-model="data.name" />
+               </div></div>
+         </div>
+         <div class="form-group">
+            <label for="project_manager" >Project Manager</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+                  <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                  <input type="text" class="form-control" required placeholder="Project Manager Name" title="Project Manager Name" name="code" id='project_manager' ng-model="data.project_manager" typeahead="value as value.display for value in typeahead.project_manager | filter:{display:$viewValue} | limitTo:5" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="start_date" >Start Date</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+                  <span class="input-group-addon glyphicon glyphicon-calendar"></span>
+                  <!--<input type="date" class="form-control" required placeholder="Start Date" title="Start Date" name="start_date" id="start_date" ng-model="data.start_date"  />-->
+                  <input type="text" class="form-control" required placeholder="Start Date" title="Start Date" name="start_date" id="start_date" ng-model="data.start_date" datepicker-popup is-open="start_date.open" min="start_date.minDate"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="end_date" >End Date</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+                  <span class="input-group-addon glyphicon glyphicon-calendar"></span>
+                  <!--<input type="date" class="form-control" required placeholder="End Date" title="End Date" name="end_date" id="end_date" ng-model="data.end_date"  />-->
+                  <input type="text" class="form-control" required placeholder="End Date" title="End Date" name="end_date" id="end_date" ng-model="data.end_date" datepicker-popup is-open="end_date.open" min="end_date.minDate"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="description" >Project Description</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+                  <span class="input-group-addon glyphicon glyphicon-comment"></span>
+                  <textarea class="form-control" required placeholder="Project Description" title="Project Description" name="description" id="description" ng-model="data.description"  >
+                  </textarea>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="opt.reference">
+            <h4 class="refSection">{{opt.foreign[key].title}}</h4>
+            <div>
+               <div ng-repeat="(key,links) in opt.reference" >
+                  <div class="input-group btn-group" data-toggle="buttons" ng-init="col1=opt.foreign[key].col1;col2=opt.foreign[key].col2;parent=data[opt.foreign[key].parent];type=opt.foreign[key].type;">
+                     <span class="input-group-addon glyphicon glyphicon-book"></span>
+                     <lable ng-repeat="(k,link) in links.rows" ng-init="temp=link[col1]" ng-class="'btn btn-primary '+{true:'active'}[temp!=null]" ng-click="DBenum(links,parent,col1,k,type); ">
+                        <input type="{{type||'checkbox'}}" name="title" ng-model="link[col2]" ng-value="true" />{{link[col2]}}</lable>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div ng-if="licentia.deLta||data.jesua==prima||true" ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+            <button type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
+         </div>
+         </form>
+         <div ng-repeat="(ref,lists) in opt.listsConf" ng-if="opt.listsVal[ref]" class="table-responsive panel panel-primary">
+            <div class="panel-heading"><h3 class="panel-title">{{lists.title}}. &nbsp;&nbsp;<small class="white" ng-show="!opt.listsVal">Click the bill below to see more details</small> </h3></div>
+            <div class="panel-body">
+               <table class="table table-hover table-condensed table-dynamic table-list">
+                  <thead>
+                     <tr>
+                        <th>#</th><th>Name</th><th>Supplier</th><th>Amount Due</th><th>Status</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr ng-repeat="(key,list) in opt.listsVal[ref]">
+                        <td>{{key+1}}</td>
+                        <td><a href="#bills/view/{{list.jesua}}" >{{list.name}}</a></td>
+                        <td><a href="#bills/view/{{list.jesua}}" >{{list.supplier_name}}</a></td>
+                        <td><a href="#bills/view/{{list.jesua}}" >{{list.amount_due}}</a></td>
+                        <td><a href="#bills/view/{{list.jesua}}" >{{list.status}}</a></td>
+                     </tr>
+                  </tbody>
+                  <tfoot ng-if="opt.listsVal">
+                     <tr><td colspan="5">&nbsp;</td></tr>
+                  </tfoot>
+               </table>
+            </div>
+         </div>
+      </section><small ng-show="false">{{data|json}} <hr/> {{btnClass|json}} <hr/> {{opt|json}}</small>
+   </section>
+</article>

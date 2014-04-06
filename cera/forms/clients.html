@@ -20,7 +20,7 @@
    <section id="detailView"  ng-if="view=='details'">
       <header class="menuHeader"><ol class="breadcrumb"><li><a href="#genesis">Home</a></li><li><a ng-href="{{menu.details[0].url}}">{{menu.details[0].name}}</a></li><li class="active">{{data.name||"New"}} {{menu.details[1].name}}</li></ol><a ng-if="licentia.Alpha" ng-href="{{menu.list[0].url}}" class="glyphicon glyphicon-plus success"></a><a ng-if="licentia.omegA" href="javascript:void(0)" ng-click="delete()" class="glyphicon glyphicon-remove danger"></a></header>
       <section class="">
-         <form id="clientForm" ng-submit="submit()">
+         <form id="clientForm" ng-submit="submit(dataForm)" name='dataForm'>
             <input type="hidden" class="form-control" ng-model="data.jesua" />
          <div id='srvModified1' class="input-group">
             <span class="input-group-addon glyphicon glyphicon-calendar"></span>
@@ -47,7 +47,7 @@
             </div>
          </div>
          <div id='srvModified' class="input-group">
-            <button ng-if="licentia.deLta" type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
+            <button ng-if="licentia.deLta||true" type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
          </div>
          </form>
       </section>

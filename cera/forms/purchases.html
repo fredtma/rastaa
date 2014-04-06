@@ -1,0 +1,98 @@
+<article  ng-controller="purchasesCtrl">
+   <section id="listView" ng-if="view=='list'">
+      <section id="mainContent" class="listing">
+         <ul class="list-group profile-listing">
+         <li class=" " ng-repeat="row in data">
+            <div class="cols1">
+               <span ng-class="'item-icon glyphicon glyphicon-user success'"></span>
+            </div>
+            <div class="cols2">
+               <a href="#purchases/view/{{row.jesua}}">
+                  <h4>
+                     {{row.name}}
+                  </h4>
+                  <small><span ng-if='row.contact'>{{row.contact}}, </span> <span ng-if='row.tel'>{{row.tel}}.</span></small>
+               </a>
+            </div>
+         </li>
+         </ul>
+      </section>
+   </section>
+   <section id="detailView"  ng-if="view=='new'||view=='view'">
+      <section class="">
+         <form id="dataForm" ng-submit="submit(dataForm)" name='dataForm'>
+         <input type="hidden" class="form-control" ng-model="data.jesua" />
+         <input type="hidden" class="form-control" ng-model="data.modified" />
+         <input type="hidden" class="form-control" ng-model="data.category" />
+         <div class="form-group">
+            <label for="supplier_name" >Supplier Name</label>
+            <div>
+               <div class="input-group">
+                  <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
+                  <input type="text" class="form-control" required placeholder="The Supplier Name" title="The Supplier Name" autofocus id="supplier_name" name="supplier_name" ng-model="data.supplier_name" />
+               </div></div>
+         </div>
+         <div class="form-group">
+            <label for="project_name" >The Project Name</label>
+            <div>
+               <div class="input-group">
+                  <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                  <input type="text" class="form-control" required placeholder="The Project name" title="The Project name" name="project_name" id='project_name' ng-model="data.project_name" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="order_number" >Order Number</label>
+            <div>
+               <div class="input-group">
+                  <span class="input-group-addon glyphicon glyphicon-tags"></span>
+                  <input type="text" class="form-control" required placeholder="Purchase Order Number" title="Purchase Order Number" name="order_number" id="order_number" ng-model="data.order_number"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="due_date" >Due Date</label>
+            <div>
+               <div class="input-group">
+                  <span class="input-group-addon glyphicon glyphicon-calendar"></span>
+                  <input type="datetime" class="form-control" required placeholder="Project Due Date" title="Project Due Date" name="due_date" id="due_date" ng-model="data.due_date"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="innitiator" >Administrator</label>
+            <div>
+               <div class="input-group">
+                  <span class="input-group-addon fa fa-user"></span>
+                  <input type="text" class="form-control" required placeholder="Pruchase order innitiator" title="Pruchase order innitiator" name="innitiator" id="innitiator" ng-model="data.innitiator"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="approver" >Approver</label>
+            <div>
+               <div class="input-group">
+                  <span class="input-group-addon fa fa-gavel fa-font"></span>
+                  <input type="text" class="form-control" required placeholder="Purchase Order Approver" title="Purchase Order Approver" name="approver" id="approver" ng-model="data.approver"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="opt.reference">
+            <h4 class="refSection">{{opt.foreign[key].title}}</h4>
+            <div>
+               <div ng-repeat="(key,links) in opt.reference" >
+                  <div class="input-group btn-group" data-toggle="buttons" ng-init="col1=opt.foreign[key].col1;col2=opt.foreign[key].col2;parent=data[opt.foreign[key].parent];type=opt.foreign[key].type;">
+                     <span class="input-group-addon glyphicon glyphicon-book"></span>
+                     <lable ng-repeat="(k,link) in links.rows" ng-init="temp=link[col1]" ng-class="'btn btn-primary '+{true:'active'}[temp!=null]" ng-click="DBenum(links,parent,col1,k,type); ">
+                        <input type="{{type||'checkbox'}}" name="title" ng-model="link[col2]" ng-value="true" />{{link[col2]}}</lable>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div ng-if="licentia.deLta||data.jesua==prima||true" class="input-group">
+            <button type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
+         </div>
+         </form>
+      </section><small ng-show="!PASCO">{{data|json}} <hr/> {{btnClass|json}} <hr/> {{opt|json}}</small>
+   </section>
+</article>

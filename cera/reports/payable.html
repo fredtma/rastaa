@@ -1,0 +1,129 @@
+<article ng-controller="rptAFP">
+   <section id="listView" ng-if="view=='list'">
+      <section id="mainContent" class="listing">
+         <ul class="list-group profile-listing">
+         <li class=" " ng-repeat="row in data">
+            <div class="cols1">
+               <span ng-class="'item-icon fa fa-list-alt text-success'"></span>
+            </div>
+            <div class="cols2">
+               <a href="#payable/report/{{row.jesua}}">
+                  <h4>
+                     Reference {{row.reference}} - <small><strong>Supervisor</strong>: {{row.supervisor}}</small>
+                  </h4>
+                  <small><span ng-if='row.accountant'><i>Accountant {{row.accountant}}</i>, </span> <span ng-if='row.created'><i>{{row.created}}</i>.</span></small>
+               </a>
+            </div>
+         </li>
+         </ul>
+      </section>
+   </section>
+   <section id="listView" class="listContainer"  ng-if="view=='report'">
+      <div class="container-fluid fullPage">
+         <!--header row-->
+         <div class="row">
+            <div class='col-xs-12 bg-info repHeader'><h3>Approval for Payment. <small>AFP report</small></h3></div>
+         </div>
+         <!--address row-->
+         <div class="row">
+            <div class='col-xs-4 bg-info repAddress'>
+               <address>
+                  <strong>Rastaa outsourcing</strong><br/>
+                  <abbr title="telphone">T</abbr>: 107 455 8887<br/>
+                  <abbr title="email address">E</abbr>: <a href="mail:info@rastaa.com">info@rastaa.com</a><br/>
+                  1st Floor, Carlton Center<br/>
+                  Corner Smith street & Copernicus<br/>
+                  Luanda (2021)<br/>
+
+               </address>
+            </div>
+            <div class='col-xs-8 bg-primary text-right repDetails'>
+               <h4>Server Administration</h4>
+               <dl class="dl-horizontal">
+                  <dt>Accountant</dt><dd>
+                     <input type="text" form="dataForm" class="form-control borderless" required placeholder="Accountant" title="Accountant" id="accountant" name="accountant" ng-model="data.accountant"  typeahead="value as value.display for value in typeahead.accountant | filter:{display:$viewValue} | limitTo:5"/>
+                  </dd>
+                  <dt>Date</dt><dd>
+                     <input type="text" class="form-control borderless" placeholder="Date created" title="Date created" ng-model="data.created" datepicker-popup is-open="start_date.open" min="start_date.minDate"   />
+                  </dd>
+                  <dt>Signature 1</dt><dd>
+                     <input type="text" form="dataForm" class="form-control borderless" required placeholder="First signature" title="First signature" id="signature1" name="signature1" ng-model="data.signature1"  typeahead="value as value.display for value in typeahead.signature1 | filter:{display:$viewValue} | limitTo:5"/>
+                  </dd>
+                  <dt>Signature 2</dt><dd>
+                     <input type="text" form="dataForm" class="form-control borderless" required placeholder="Second signature" title="Second signature" id="signature2" name="signature2" ng-model="data.signature2"  typeahead="value as value.display for value in typeahead.signature2 | filter:{display:$viewValue} | limitTo:5"/>
+                  </dd>
+                  <dt>Supervisor</dt><dd>
+                     <output type="text" form="dataForm" class="form-control borderless" required placeholder="Supervisor" title="Supervisor" id="supervisor" name="supervisor" ng-model="data.supervisor" >{{data.supervisor}}</output>
+                  </dd>
+               </dl>
+            </div>
+         </div>
+         <!--input row-->
+         <div class="row">
+            <div class='col-xs-12 small-row'>&nbsp;</div>
+         </div>
+         <!--navigation row-->
+         <div class="row">
+            <div class='col-xs-12 bg-info small-row'>&nbsp;</div>
+         </div>
+         <!--content row-->
+         <div class="row repContent">
+            <div class='col-xs-12 table-responsive'>
+               <table class="table table-condensed table-striped">
+                  <thead>
+                     <tr class='row repRowHead'>
+                        <th class='cnt'>#</th>
+                        <th class=''><a class="link" ng-click="order('name')">AFP Name</a></th>
+                        <th class=''><a class="link" ng-click="order('due_date')">Due Date</a></th>
+                        <th class=''><a class="link" ng-click="order('supplier_name')">Supplier</a></th>
+                        <th class=''><a class="link" ng-click="order('project_name')">Project</a></th>
+                        <th class=''><a class="link" ng-click="order('approver')">Approver</a></th>
+                        <th class=''><a class="link" ng-click="order('bank')">Bank</a></th>
+                        <th class=''><a class="link" ng-click="order('status')">Status</a></th>
+                        <th class=''><a class="link" ng-click="order('amount_due')">Amount</a></th>
+                        <th class=''><a class="link" ng-click="order('currency')">Currency</a></th>
+                        <th class=' opt'> <a class="link" ng-click="order('option')">Option</a></th>
+                     </tr>
+                  </thead>
+                  <tbody class="text-primary">
+                     <tr ng-if="!opt.itemsVal" class='row repRowContent'><td class="2" colspan="10">{{data.msg}}</td></tr>
+                     <tr ng-repeat="(key,row) in opt.itemsVal.bills | filter:inputSearch | orderBy:ord" class='row repRowContent'>
+                        <td class=' cnt'>{{key+1}}</td>
+                        <td class=''>{{row.name}}</td>
+                        <td class=''>{{row.due_date}}</td>
+                        <td class=''>{{row.supplier_name}}</td>
+                        <td class=''>{{row.project_name}}</td>
+                        <td class=''>{{row.approver}}</td>
+                        <td class=''>{{row.bank}}</td>
+                        <td class=''>{{row.status}}</td>
+                        <td class=''>{{row.amount_due}}</td>
+                        <td class=''>{{row.currency}}</td>
+                        <td class=' opt'><input type="checkbox" ng-model="row.payable_ref" ng-true-value="{{data.reference}}" ng-false-value="0" /></td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+         <!--summary row-->
+         <div class="row repFoot1">
+            <div class='col-xs-12 bg-primary'>&nbsp;</div>
+         </div>
+         <!--footer row-->
+         <div class="row repFoot2">
+            <div class='col-xs-12 bg-info'>
+               <form id="dataForm" ng-submit="submit(dataForm)" name='dataForm' class="form-inline">
+                  <input type="hidden"  ng-model="data.jesua" form="dataForm" />
+                  <div class="form-group">
+                    <label class="sr-only" for="project_manager" >Reference</label>
+                     <div ng-class="'input-group widthAuto '+{true:'has-error'}[errMsg.firstname]" style="width:20em;">
+                        <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                        <input type="text" form="dataForm" class="form-control widthAuto" required placeholder="Reference Code" title="Reference Code" name="code" id='reference' ng-model="data.reference" />
+                     </div>
+                  </div>
+                  <button type="submit" form="dataForm" ng-class="btnClass" name="submit" style="margin-bottom: 0.3em;width: 20em;" >{{btn}}</button>
+               </form>
+            </div>
+         </div>
+      </div>
+   </section>
+</article>

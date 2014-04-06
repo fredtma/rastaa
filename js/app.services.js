@@ -1,45 +1,25 @@
 'use strict';
-var service=angular.module('rastaa.services', ['ngResource']).value('version', '0.1');
-service.factory('online',['$resource',online]).service('notitia',['$resource',notitia]).service('fetch',['$http',fetch]).service('crud',['notitia','$routeParams',crud]);
-//############################################################################//
-//ONLINE                                                                      //
-//############################################################################//
-function online($resource){
-   var url=dynamis.get('SITE_NOTITIA'),data={};
-   return {
-      single:function(params,path,method,cache,type){url=path||url,type=type||'json';cache=cache||false,method=method||"POST";
-         var data=$resource(url,{},{"query":{"method":method, "params":params,isArray:false,"cache":cache,"responseType":type}});
-         return data;},
-      multy:function(options){
-         if(isArray(options)==false) {iyona.msg("Variable `option` is not an array"); return false;}
-         var query={},l=options.length;
-         for(var x=0;x<l;x++){
-            for(var obj in options[x]) break; var object=options[x][obj];
-            var post=object.post||"POST",params=object.params||{},isArray=object.isArray||false,cache=object.cache||false,type=object.type||"json",url=object.url||url;
-            query[obj]={"method":post, "params":params,"isArray":isArray,"cache":cache,"responseType":type,"url":url};
-            data[obj]=$resource(url,{},{"query":query[obj]});
-         }//var data=$resource(url,{},query);
-         return data;
-      }
-   }
-}
+angular.module('rastaa.services', ['ngResource']).value('version', '0.1')
+.service('notitia',['$resource','$rootScope',notitia])
+.service('fetch',['$http','$rootScope',fetch])
+.service('crud',['notitia','$routeParams','$modal','$log','fetch','$rootScope',crud]);
 //############################################################################//
 //NOTITIA                                                                     //
 //############################################################################//
-function notitia($resource){
+function notitia($resource,$rootScope){
    var that=this,eternal=eternalCall();
    if(dynamis.get("CONFIG").openDatabase===false&&dynamis.get("CONFIG").indexedDB===false&&dynamis.get("CONFIG").Online===false)return false;
    if(eternal){that.name=eternal.form.field.name;that.frmName='frm_'+that.name;that.frmID='#frm_'+that.name;}
    that.patterns=dynamis.get("EXEMPLAR");
-   var option={"users":0,"contacts":0,"version_db":0};//used in resetdb && iresetdb
-   this.database=dynamis.get("scope");
+   var option={"users":0,"contacts":0,"version_db":0,"servers":0,"log_mails":0,"log_servers":0,"lists":0,"clients":0};//used in resetdb && iresetdb
    var IDBTransaction=window.IDBTransaction||window.webkitIDBTrasaction;
    var indexedDB=window.indexedDB||window.webkitIndexedDB||window.mozIndexedDB||window.msIndexedDB;
    var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
    //=========================================================================//SET DB AND VERSION
    if(dynamis.get("CONFIG").openDatabase)that.db=window.openDatabase(sessionStorage.DB_NAME,'',sessionStorage.DB_DESC,sessionStorage.DB_SIZE*1024*1024,function(){iyona.log('create a new DB')});
    if(dynamis.get("CONFIG").indexedDB&&false)indexedDB.deleteDatabase(sessionStorage.DB_NAME);
-   if(dynamis.get("CONFIG").indexedDB)this.iRequest=indexedDB.open(sessionStorage.DB_NAME,parseInt(sessionStorage.DB_VERSION));
+   if (dynamis.get("CONFIG").iDB===false)indexedDB.deleteDatabase(sessionStorage.DB_NAME);
+   else if(dynamis.get("CONFIG").indexedDB||dynamis.get("CONFIG").iDB)this.iRequest=indexedDB.open(sessionStorage.DB_NAME,parseInt(sessionStorage.DB_VERSION));
    if(dynamis.get("CONFIG").openDatabase&&that.db.version!=sessionStorage.DB_VERSION){
       iyona.log("Changing version.");
       that.version={};that.version.ver=sessionStorage.DB_VERSION;
@@ -273,13 +253,15 @@ function notitia($resource){
    //=========================================================================//
    this.resetDB=function(_option){
       if(angular.isString(_option)&&option.hasOwnProperty(_option))option[_option]=true; else if (_option===true)option=true; else if(angular.isObject(_option))option=_option;
-      for (var table in this.database){iyona.deb(table,"creating",option,option[table]);
+      var defaultScope = dynamis.get("defaultScope",true);
+      for (var profile in defaultScope){
+         var table=defaultScope[profile].mensa;
+         iyona.deb(table,"creating",option,option[table]);
          if(option[table]||option===true){
-            var mensa=this.database[table],quaerere='',ref='',l,x,indexes=[],references=[],names=[];
+            var mensa=defaultScope[profile].creation,quaerere='',ref='',l,x,indexes=[],references=[],names=[];
             that.agito("DROP TABLE "+table,[],"DROP table "+table);
-            if(mensa.defaults)angular.extend(mensa.fields,mensa.defaults);
-            for(var field in mensa.fields){
-               var current=mensa.fields[field];
+            for(var field in mensa){
+               var current=mensa[field];
                quaerere+="`"+field+"` "+current.type;names.push(field);
                if(current.key===true)quaerere+=" PRIMARY KEY AUTOINCREMENT";
                if(current.key==="unique")quaerere+=" PRIMARY KEY";
@@ -422,29 +404,39 @@ function notitia($resource){
       if(that.iRequest.readyState!="done"){that.iRequest.addEventListener("success",function(){that.iResetDB(_option,e)},false); return false;}
       else {this.idb=that.iRequest.result;}
 
-      var column;
+      var store;iyona.deb("RESETING");
       if(angular.isString(_option)&&option.hasOwnProperty(_option))option[_option]=true; else if (_option===true)option=true; else if(angular.isObject(_option))option=_option;
-      for(var table in that.database){
-         if(option[table]||option===true){
-            var mensa=that.database[table];iyona.deb(table,'table');
-            if(mensa.defaults)angular.extend(mensa.fields,mensa.defaults);
+      var defaultScope = dynamis.get("defaultScope",true);
+      for(var profile in defaultScope){var table = defaultScope[profile].mensa;
+         if(option[table]||option===true){iyona.deb("RESSETING "+table,that.iRequest,e);
+            var mensa=defaultScope[profile].creation;
+
             if(this.idb.objectStoreNames.contains(table)!==true){
-               column=that.iRequest.result.createObjectStore(table,{keyPath:"jesua"});
-               for(var field in mensa.fields){//@note:no need to add column as the store is dynamic.
-                  var current=mensa.fields[field]; if(field==='jesua')continue;
-                  //column.add(field);@todo::add data from online
-                  //var data=$resource(dynamis.get("SITE_SERVICE"),{},{"query":{"method":"POST", "params":"get"+table,isArray:false,"cache":false,"responseType":"json"}});
-                  if(current.unique) column.createIndex('uniq'+field,field,{unique:true});//keyname,keypath
-                  if(current.ndx) column.createIndex(current.ndx,field);
+               store=that.iRequest.result.createObjectStore(table,{keyPath:"jesua"});
+               for(var field in mensa){//@note:no need to add store as the store is dynamic.
+                  var current=mensa[field]; if(field==='jesua')continue;
+                  if(current.unique) store.createIndex('uniq_'+field,field,{unique:true});//keyname,keypath
+                  if(current.ndx) store.createIndex(current.ndx,field);
                }//for field in mensa.fields
+               //store.add(field);@todo::add data from online
+               var data=$resource(dynamis.get("SITE_SERVICE"),{},{"query":{"method":"POST",isArray:false,"cache":false,"responseType":"json"}});
+               data.query({"militia":"imple","mensa":table},function(e){iyona.deb("RESOURCE",e);if("notitia" in e===false){iyona.log("could not auto update iDB");return false;}
+                  var x,l=e.notitia.rows.length;
+                  for(x=0;x<l;x++){that.iWrite(e.notitia.mensa,e.notitia.rows[x]);}
+               });
+
             }else{//to update
-               column=that.iRequest.transaction.objectStore(table);
-               for(var field in mensa.fields){//@note:no need to add column as the store is dynamic.
-                  var current=mensa.fields[field];
+               store=(that.iRequest.transaction)?that.iRequest.transaction.objectStore(table):e.currentTarget.transaction.objectStore(table);
+               var x,l=store.indexNames.length;
+               iyona.deb("COLUMN",typeof store.indexNames,angular.isArray(store.indexNames),store.indexNames);
+               for(x=0;x<l;x++){if(typeof store.indexNames[x]==='string')store.deleteIndex(store.indexNames[x]);}//remove all indexs
+
+               for(var field in mensa){//@note:no need to add store as the store is dynamic.
+                  var current=mensa[field];
                   try{
-                     if(current.unique&&!column.index('uniq'+field)) column.createIndex('unique'+field,field,{unique:true});
-                     if(current.ndx&&!column.index(column.ndx)) column.createIndex(current.ndx,field);
-                  }catch(e){iyona.log("An error occured in creting the index::"+e.message, e)}
+                     if(current.unique&&!objSearch(store.indexNames,'uniq_'+field)) {store.createIndex('uniq_'+field,field,{unique:true});}
+                     if(current.ndx&&!objSearch(store.indexNames,current.ndx)) {store.createIndex(current.ndx,field);}
+                  }catch(e){iyona.log("An error occured in creating the index::"+e.message, field,e)}
 
                }//for field in mensa.fields
             }
@@ -453,46 +445,55 @@ function notitia($resource){
       }//for table in that.database
    }
    //=========================================================================//
-   this.iWrite=function(_store,_add,_update){
-      if(that.iRequest.readyState!="done"){that.iRequest.addEventListener("success",function(){that.iWrite(_store,_add,_update)},false); return false;}
-      else {this.idb=that.iRequest.result;}
+   this.iWrite=function(_store,_data,_update){var crud;
+      if(that.iRequest&&that.iRequest.readyState!="done"){that.iRequest.addEventListener("success",function(){that.iWrite(_store,_data,_update)},false); return false;}
+      else if(that.iRequest) {this.idb=that.iRequest.result;}
+      else return false;
+      if(this.idb.objectStoreNames.contains(_store)!==true)return false;
 
       var store=_store||"users",transaction=this.idb.transaction(store,"readwrite"),request;
       var objectStore=transaction.objectStore(store);
-      if(typeof _add!=="object") return false;
+      if(typeof _data!=="object") return false;
 
-      if(!_update){request=objectStore.add(_add);iyona.deb("inserting in idb");}
-      else {request=objectStore.put(_add);iyona.deb("updating in idb");}
-      request.onsuccess=function(e){iyona.log("Successfully added to "+store);that.secondKings();}
+      if(!_update){request=objectStore.add(_data);crud='inserted';}
+      else {request=objectStore.put(_data);crud='updated';}
+      request.onsuccess=function(e){iyona.log("Successfully "+crud+" to "+store);}
       request.oncomplete=function(e){iyona.log("Successfully completed addeding to "+store+"::"+e.target.error.message);}
-      request.onerror=function(e){iyona.log("Error while writing to "+store+"::"+e.target.error.message);}
+      request.onerror=function(e){iyona.log("Error while writing to "+store+"::"+e.target.error.message,_data);}
    }
    //=========================================================================//
-   this.iRead=function(_store,_index,_callback){
-      if(that.iRequest.readyState!="done"){that.iRequest.addEventListener("success",function(){SET.read(_store,_callback,_index)},false); return false;}
-      else {this.idb=that.iRequest.result;}
+   this.iRead=function(_store,_index,_callback,_passVar){
+      if(that.iRequest&&that.iRequest.readyState!="done"){that.iRequest.addEventListener("success",function(){that.iRead(_store,_index,_callback,_passVar)},false); return false;}
+      else if(that.iRequest) {this.idb=that.iRequest.result;}
+      else return false;
+      if(this.idb.objectStoreNames.contains(_store)!==true)return false;
 
       var store=_store||"users",transaction=this.idb.transaction(store),request;
-      var objectStore=transaction.objectStore(store);
+      var objectStore=transaction.objectStore(store),ndx=null,order,keyRange=null;
 
-      if(typeof _index=="object"&&_index.hasOwnProperty("where"))var ndx=objectStore.index(_index.where);
-      if(typeof _index=="object"&&_index.hasOwnProperty("order"))var order=(_index.order.search(/desc/i)!=-1||_index.order.search(/prev/i)!=-1)?'prev':null;
-      if(typeof _index=="number"){request=objectStore.get(_index);
-      }else if(typeof _index=="object"&&_index.hasOwnProperty("top")){var keyRange=IDBKeyRange.lowerBound(_index.top); request=objectStore.openCursor(keyRange,order);
-      }else if(typeof _index=="object"&&_index.hasOwnProperty("bot")){var keyRange=IDBKeyRange.upperBound(_index.bot); request=objectStore.openCursor(keyRange,order);
-      }else if(typeof _index=="object"&&_index.hasOwnProperty("between")){var keyRange=IDBKeyRange.bound(_index.between[0],_index.between[1],true,true); request=ndx.openCursor(keyRange,order);
-      }else if(typeof _index=="object"&&_index.hasOwnProperty("is")){request=ndx.get(_index.is);
-      }else if(typeof _index=="object"&&_index.hasOwnProperty("like")){var keyRange=IDBKeyRange.bound(_index.like,_index.like+'\uffff'); request=ndx.openCursor(keyRange,'prev');
+      if(_index!==null&&typeof _index=="object"&&_index.hasOwnProperty("where"))ndx=objectStore.index(_index.where);
+      if(_index!==null&&typeof _index=="object"&&_index.hasOwnProperty("order"))order=(_index.order.search(/desc/i)!=-1||_index.order.search(/prev/i)!=-1)?'prev':'next';
+
+      if(_index!==null&&(typeof _index=="number"||typeof _index=="string")){request=objectStore.get(_index);//for the pk
+      }else if(_index!==null&&typeof _index=="object"&&_index.hasOwnProperty("top")){keyRange=IDBKeyRange.lowerBound(_index.top); request=ndx.openCursor(keyRange,order);//limit top
+      }else if(_index!==null&&typeof _index=="object"&&_index.hasOwnProperty("bot")){keyRange=IDBKeyRange.upperBound(_index.bot); request=ndx.openCursor(keyRange,order);//limit bottome
+      }else if(_index!==null&&typeof _index=="object"&&_index.hasOwnProperty("between")){keyRange=IDBKeyRange.bound(_index.between[0],_index.between[1],true,true); request=ndx.openCursor(keyRange,order);//between
+      }else if(_index!==null&&typeof _index=="object"&&_index.hasOwnProperty("is")){request=ndx.get(_index.is);//where field1=value
+      }else if(_index!==null&&angular.isArray(_index)){request=objectStore.openCursor(_index);//where field1=value1 and field2=value2
+      }else if(_index!==null&&typeof _index=="object"&&_index.hasOwnProperty("like")){keyRange=IDBKeyRange.bound(_index.like,_index.like+'\uffff'); request=ndx.openCursor(keyRange,'prev');//where like...
+      }else if(ndx){request=ndx.openCursor(keyRange,order);
       }else{request=objectStore.openCursor();}
 
-      request.onsuccess=_callback;//e.target.result
+      request.onsuccess=function(e){_callback(e,_passVar);}//e.target.result
       request.oncomplete=function(e){iyona.log("Successfully completed addeding to "+store,e);}
       request.onerror=function(e){iyona.log("Error while writing to "+store+"::"+request.error,e);}
    }
    //=========================================================================//
    this.iErase=function(_store,_index,_callback){
-      if(that.iRequest.readyState!="done"){that.iRequest.addEventListener("success",function(){SET.erase(_store,_index,_callback)},false); return false;}
-      else {this.idb=that.iRequest.result;}
+      if(that.iRequest&&that.iRequest.readyState!="done"){that.iRequest.addEventListener("success",function(){SET.erase(_store,_index,_callback)},false); return false;}
+      else if(that.iRequest) {this.idb=that.iRequest.result;}
+      else return false;
+      if(this.idb.objectStoreNames.contains(_store)!==true)return false;
 
       var store=_store||"users",transaction=this.idb.transaction(store,"readwrite");
       var objectStore=transaction.objectStore(store);
@@ -502,13 +503,13 @@ function notitia($resource){
    }
    //=========================================================================//
    this.firstKings=function(profile,scope,tau,callback,options){//@todo: add offline message//@todo:validation this.sanatio
-      var field,params=[],fields=[],set=[],res={},consuetudinem={},val,modified=new Date(),quaerere,msg,ubi,precipio,limit=10,reading;
+      var field,params=[],fields=[],set=[],res={},consuetudinem={},val,modified=new Date(),quaerere,msg,ubi,precipio,limit=10,reading,iContent,ndx;
       var jesua,alpha;var r=Math.floor((Math.random()*179)+1);
-      var profileScope=dynamis.get("scope",true)[profile],mensa=profileScope.mensa;iyona.deb("CHECKING",scope);
+      var profileScope=dynamis.get("defaultScope",true)[profile],mensa=profileScope.mensa;
       if(scope["jesua"]){jesua=scope["jesua"];alpha=scope["jesua"];}else{scope["jesua"]=0;alpha=0}
       for (field in scope){
          val=scope[field];
-         if (field in profileScope.creation || "eta" in val); else {consuetudinem[field]=val; continue;}//consuetudinem:custom fields and fields that are predefined
+         if (field in profileScope.creation || (typeof val=='obect' && "eta" in val)); else {consuetudinem[field]=val; continue;}//consuetudinem:custom fields and fields that are predefined
          jesua=jesua||md5(val+modified+r);
          if(field=="jesua"&&(tau=='Alpha'||alpha)){//set jesua for all transc//if u r inserting, 4 update & select u need an original value
             val=jesua;scope["jesua"]=jesua;
@@ -520,7 +521,8 @@ function notitia($resource){
             params.push(val);fields.push('`'+field+'`');set.push("?");}
       }
       angular.extend(consuetudinem,options);
-      that.basilia=setQuaerere(mensa,res,tau,consuetudinem);iyona.deb(res,'res',scope,'scope',JSON.parse(that.basilia),'basilia',alpha,jesua,params,fields,set,tau,"II",consuetudinem);
+      that.basilia=setQuaerere(mensa,res,tau,consuetudinem);
+      iyona.log("RES",res);iyona.log("SCOPE",scope);iyona.log("BASILIA",JSON.parse(that.basilia));iyona.log("CONSUETUDINEM",consuetudinem);iyona.log("iContent",iContent);iyona.log("LINE 524",alpha,jesua,params,fields,set,tau,ndx);      
       //----------------------------------------------------------------------//INDEXEDDB
       if(dynamis.get("CONFIG").indexedDB){
          switch(tau){
@@ -562,20 +564,18 @@ function notitia($resource){
 
    }//end firstKing
    //=========================================================================//ONLINE
-   this.secondKings=function(callback){iyona.deb("SITE_MILITIA",dynamis.get("SITE_MILITIA"),dynamis.get("CONFIG"),PASCO);
-      if(dynamis.get("CONFIG").Online){
+   this.secondKings=function(callback){
+      if(dynamis.get("CONFIG").Online){$rootScope.isViewLoading = {"width":"100%"};
          that.basilia=that.basilia||dynamis.get("quaerere",true);//,"headers":{"Content-Type":"application/x-www-form-urlencoded"}
          var service=$resource(dynamis.get("SITE_MILITIA"),{},{"militia":{"method":"POST" ,isArray:false,"cache":false,"responseType":"json","withCredentials":true}});
-         if(!PASCO&&dynamis.get("CONFIG").isOnline){service.militia(that.basilia,function(j){
-               iyona.deb(typeof j.notitia.idem,'j.notitia.idem',j);
-               iyona.deb(j.notitia.idem,'j.notitia.idem',j.notitia.idem!=0,j.notitia.idem!='0');
+         if(!PASCO&&dynamis.get("CONFIG").isOnline){service.militia(that.basilia,function(j){$rootScope.isViewLoading = false;
                if(j.notitia)iyona.log(j.notitia.sql);
                if(j.notitia&&j.notitia.idem!='0'){var u=dynamis.get("USER_NAME",true)||{};u.cons=j.notitia.idem;dynamis.set("USER_NAME",u,true)}//pour maitre un autre biscuit
                iyona.log(j,'Online');if(typeof callback=="function")callback(j);});}
-         else if(!dynamis.get("CONFIG").isOnline){iyona.msg("You are currently offline",true,"danger bold");}
+         else if(!dynamis.get("CONFIG").isOnline){iyona.msg("You are currently offline",true,"danger bold");$rootScope.isViewLoading = false;}
          else if(PASCO){var Connection=checkConnection();
             if(Connection==Connection.NONE){iyona.msg("You are currently offline",true,"danger bold");}//@doto: connection
-            else{service.militia(that.basilia,function(j){
+            else{service.militia(that.basilia,function(j){$rootScope.isViewLoading = false;
                if(j.notitia)iyona.log(j.notitia.sql);
                if(j.notitia&&j.notitia.idem!=0){var u=dynamis.get("USER_NAME",true);u.cons=j.notitia.idem;dynamis.set("USER_NAME",u)}//pour maitre un autre biscuit
                iyona.log(j,'Online');if(typeof callback=="function")callback(j);});}
@@ -587,13 +587,14 @@ function notitia($resource){
 //############################################################################//
 //FETCH                                                                       //
 //############################################################################//
-function fetch($http){
+function fetch($http,$rootScope){
    this.responseType=this.responseType||"json";
    if(!dynamis.get("CONFIG").isOnline){iyona.msg("Your device is currently Offline.",true,"danger bold"); return false;}//@todo
-   this.post=function(url,params,callback){
-      $http.post(url,$.param(params),{"responseType":this.responseType,"cache":true,"headers":{"Content-Type":"application/x-www-form-urlencoded"},"withCredentials":true}).success(callback)
+   this.post=function(url,params,callback){$rootScope.isViewLoading = {"width":"100%"};
+      $http.post(url,params,{"responseType":this.responseType,"cache":true,"headers":{"Content-Type":"application/x-www-form-urlencoded"},"withCredentials":true})
+      .success(function(server){$rootScope.isViewLoading = false;callback(server);})
 //      $http({"url":url,"params":params,"method":"POST","responseType":this.responseType,"cache":true,"headers":{"Content-Type":"application/x-www-form-urlencoded"},"withCredentials":true}).success(callback)
-      .error(function(data,status,headers,config){
+      .error(function(data,status,headers,config){$rootScope.isViewLoading = false;
          if(status==404&&PASCO&&navigator.connection.type=="none") iyona.msg("Please check your internet connection::"+navigator.connection.type,true,'danger bold');
          if(status==404&&PASCO) iyona.msg("Please check your internet connection::"+navigator.connection.type,true,'danger bold');
          iyona.log("There was an error in handling the transaction.");
@@ -605,57 +606,128 @@ function fetch($http){
 //############################################################################//
 //CRUD                                                                        //
 //############################################################################//
-function crud(notitia,$routeParams){
-   var that=this;
-   this.get=function($scope,scope,keyName,mensa,conseutudinem){var view=$routeParams.view||'details',details=$routeParams.opt||'';
-      this.scope=$scope;this.keyName=keyName;iyona.deb('$SCOPE',$scope);
-      that.scope.data={};
-      if(details!=='new'&&details!=='view'){notitia.firstKings(mensa,scope.details,3,this.details,conseutudinem)}
-      else if(view=='all'){notitia.firstKings(mensa,scope.list,3,this.list);}
+function crud(notitia,$routeParams,$modal,$log,fetch,$rootScope){
+   var that=this,defaultScope,defaultMensa,defaultTitle,defaultProfile;
+   this.get=function($scope,title,profile,_defaultScope){
+      defaultScope   = _defaultScope;//get default scope
+      var view       = $routeParams.view||'list',jesua=$routeParams.jesua||'',report=view=='report'?true:false,now = new Date().format("isoDateTime");
+      //set the menu values
+      var menu=defaultScope.menu,options={};$scope.crud={};defaultProfile=profile;
+      $rootScope.menu=view=='list'?menu.list:menu.details;
+      $rootScope.crud.alpha=menu.alpha;
+      $rootScope.crud.omega=view=='list'?false:true;
+      //set the option values
+      options.consuetudinem= defaultScope.consuetudinem;
+      options.foreignConf  = defaultScope.foreignConf||[];
+      options.listsConf    = defaultScope.listsConf||[];
+      options.itemsConf    = defaultScope.itemsConf||[];
+      options.extra        = defaultScope.extra;
+      $scope.view          = view||'list';
+      $scope.jesua         = jesua;
+      $scope.cons          = {};
+      $scope.opt           = options;iyona.deb("HERE",$routeParams);
+      $scope.btn           = (!report)?"Add a new "+title:"Submit "+title;
+      $scope.btnClass      = (!report)?'form-control btn btn-primary':"btn btn-primary";
+      defaultMensa         = defaultScope.mensa;//get the current mensa
+      this.scope           = $scope;//make the scope available to all modules
+      that.scope.data      = {};
+      defaultTitle         = title;
+      $scope.pattern       = dynamis.get("EXEMPLAR");iyona.log("NEW",view,$routeParams);
+      if(view=='view'){notitia.firstKings(profile,defaultScope.details,3,this.details,options)}
+      else if(view=='list'){notitia.firstKings(profile,defaultScope.list,3,this.list);}
+      else {angular.extend($scope.data,defaultScope.details);this.typeahead();$scope.data.created=now;$scope.data.modified=now}//new record
       return view;
    };
    this.details=function(server){
-      if("notitia" in server&&angular.isArray(server.notitia.iota)){angular.extend(that.scope.data,server.notitia.iota[0]);iyona.msg(server.notitia.msg);
-         if("consuetudinem" in server.notitia){that.scope.opt.reference=server.notitia.consuetudinem.links;}
-         that.scope.btn="Update "+that.keyName;that.scope.$broadcast("readyForm",server.notitia);
-      }else{var msg=("notitia" in server)?server.notitia.err:null; iyona.msg(msg||"There was an error fetching the selected record",true,"danger");}
+      if("notitia" in server&&angular.isArray(server.notitia.iota)){//angular.extend(that.scope.data,server.notitia.iota[0]);
+         var result=server.notitia.iota[0],row;
+         for(var field in defaultScope.details){
+            row=defaultScope.details[field];
+            if (row!==null&&row.hasOwnProperty("alpha"))row["alpha"]=result[field];
+            else row=result[field];
+            that.scope.data[field]=row;
+         }
+         $rootScope.delete=function(){that.delete();}//DELETE:function
+         iyona.msg(server.notitia.msg);
+         if("consuetudinem" in server.notitia&&server.notitia.consuetudinem){ var cons=server.notitia.consuetudinem;iyona.deb("cons.listsVal",cons);
+            that.scope.opt.foreignVal=cons.foreignVal;
+            that.scope.opt.listsVal=cons.listsVal;
+         }
+         that.scope.btn="Update "+defaultTitle;that.scope.$broadcast("readyForm",server.notitia);
+         that.typeahead();
+      }else{
+         var msg=("notitia" in server)?server.notitia.err:null;
+         iyona.msg(msg||"There was an error fetching the selected record",true,"danger");
+      }
    };
    this.list=function(server){
-      if("notitia" in server&&"err" in server.notitia){iyona.msg(server.notitia.err,true,'danger',true);
-      }else if("notitia" in server){that.scope.data=server.notitia.iota;that.scope.$broadcast("readyList",server.notitia);iyona.msg(server.notitia.msg,true,"danger");iyona.deb(server.notitia.iota,"List");
+      $rootScope.crud.omega=false;
+      if("notitia" in server&&"err" in server.notitia){iyona.msg(server.notitia.err,false,'success',true);
+      }else if("notitia" in server){
+         that.scope.data=server.notitia.iota;
+         that.scope.$broadcast("readyList",server.notitia);
+         setTimeout(SETiSCROLL,1000);/*set scroller*/
+         that.offlineDuty(that.scope.data);
+         iyona.msg(server.notitia.msg,false,"");iyona.deb(server.notitia.iota,"List");
       }else{iyona.msg("There was an error fetching the selected record",true,"danger",true);}
    };
-   this.submit=function($scope,scope,mensa,conseutudinem){
-      var tau=$scope.data.jesua?"deLta":"Alpha";
+   this.submit=function($scope,profile){iyona.deb("SCOPE",$scope);
+      var tau=$scope.data.jesua?"deLta":"Alpha";if(this.check($scope,'dataForm')===false)return false;
       if(tau=="deLta"){delete $scope.data.created;}//upon update do not change the creation date.
-      else if (tau=="Alpha"&&scope.details.created) {var d=new Date().format("isoDateTime");$scope.data.created=d;$scope.data.modified=d;}
+      else if (tau=="Alpha"&&defaultScope.details.created) {var d=new Date().format("isoDateTime");$scope.data.created=d;$scope.data.modified=d;}
       try{
-         notitia.firstKings(mensa,$scope.data,tau,function(server){if("notitia" in server===false){iyona.msg(server.notitia.err||"There was an error from the server",server);return false;}
+         notitia.firstKings(profile,$scope.data,tau,
+         function(server){if("notitia" in server===false){iyona.msg("There was an error from the server",server);return false;}
             var notitia=server.notitia,consuetudinem=notitia.consuetudinem,err="err" in notitia?true:false,clss=err?"danger bold":"success";
             if(tau=="Alpha"&&err)$scope.data.jesua=null;//if there is an error when adding data reset the form jesua
-            if(consuetudinem.links){$scope.opt.reference=consuetudinem.links;} //do not overflow the update
+            else $scope.btn="Update "+defaultTitle;
+            if(consuetudinem&&consuetudinem.foreignVal){$scope.opt.foreignVal=consuetudinem.foreignVal;} //do not overflow the update
+            if(consuetudinem&&consuetudinem.listVal){$scope.opt.listVal=consuetudinem.listVal;} //do not overflow the update
+//            $scope.btnClass=err?"form-control btn btn-danger":"form-control btn btn-success";//somehow this is not working
             var tmp=$scope.btn;$scope.btn=notitia.msg;setTimeout(function(){$scope.btn=tmp;$scope.$apply();},2000);
             iyona.msg(notitia.msg,false,clss);
-         },conseutudinem);
+         },$scope.opt);
       }catch(e){iyona.msg("There was an internal error. return to the previous page and try again."); iyona.log("Internal error::"+e.message,e);if(tau=="Alpha");$scope.data.jesua=null;}
    }
-   this.delete=function($scope,mensa){
-      var msg="Would you like to remove the current record?";
-      if(!$scope.data.jesua){iyona.msg("You need to add a new record first.",false,"danger bold"); return false;}
-      if (PASCO){navigator.notification.confirm(msg,function(buttonIndex){
-            if(buttonIndex==1){this.remove($scope,mensa);}
-         },"Remove Server",["Yes","No"]);
-      }else if(confirm(msg)){this.remove($scope,mensa);};
+   this.delete=function(){
+      if(!that.scope.data.jesua){iyona.msg("You need to add a new record first.",false,"danger bold"); return false;}
+      var modalInstance=$modal.open({"templateUrl":"cera/templates/ModalContent.html","windowClass":"modalClass","controller":modalShow,"resolve":{passing:function(){return "Would you like to remove the current record?";}}});
+      modalInstance.result.then(function(selected){that.scope.modalSelected=selected;that.remove();},function(selected){$log.debug("The button selected is::",selected);});
+      return;
    }
-   this.remove=function($scope,mensa){
+   this.remove=function(){
       var tau="omegA";
-      notitia.firstKings(mensa,$scope.data,tau,function(server){
+      notitia.firstKings(defaultProfile,that.scope.data,tau,function(server){
          if(!server.notitia) {iyona.log("There was an error retrieving notitia"); return false};
          if("err" in server.notitia) {iyona.log(server.notitia.err,true,'danger',true); return false};
          var notitia=server.notitia,err="err" in notitia?true:false,clss=err?"danger bold":"success";
-         var scope=dynamis.get("scope")[$routeParams.page];$scope.data=scope;$scope.opt.reference=null;//empty scope
+         that.scope.data=defaultScope;that.scope.opt.foreignVal={};that.scope.opt.listsVal={};
+         that.scope.btn="Add a new "+defaultTitle;that.scope.opt.reference=null;//empty scope
          if(notitia.consuetudinem&&notitia.consuetudinem.servers&&notitia.consuetudinem.servers.length>0){}
          iyona.msg(notitia.msg,true,clss);
+      });
+   }
+   this.savItem=function(mensa,list){iyona.deb("SAVE",list,mensa);
+      var parent=defaultScope.listsConf[mensa].ref;
+      fetch.post(dynamis.get("SITE_SERVICE"),{"militia":"novum album","mensa":mensa,"list":list,"parent":parent},function(results){if(!results){iyona.msg("no result was return."); return false;}
+            iyona.deb("RESULTS",results);
+         if("msg" in results)iyona.msg(results.msg); else iyona.msg(results.err,false,"danger");
+      });
+   };
+   this.addItem=function(key){
+      if(!that.scope.opt.listsVal){that.scope.opt.listsVal={};that.scope.opt.listsVal[key]=[];}
+      var obj={},listsObj=defaultScope.listsConf[key];//,{"lists_name":"Add a name here","description":"Add a description here","isNew":1}
+      if("parent" in listsObj){ var parentVal=that.scope.data[listsObj.parent].hasOwnProperty("alpha")?that.scope.data[listsObj.parent].alpha:that.scope.data[listsObj.parent]; obj={"isNew":1};}
+      else {parentVal=null;}
+      for(var field in listsObj.fields)obj[field]=listsObj.fields[field]?listsObj.fields[field].alpha:parentVal;//the new obj will take the default value or the parent value when empty
+      iyona.deb("that.scope.opt.listsVal",that.scope.opt.listsVal,key);
+      that.scope.opt.listsVal[key].push(obj);iyona.deb("HERE",that.scope.opt.listsVal[key],key,obj);
+   };
+   this.remItem=function(no,ref,list){
+      if("$$hashKey" in list) delete list['$$hashKey'];defaultScope;
+      fetch.post(dynamis.get("SITE_SERVICE"),{"militia":"tollere album","mensa":ref,"list":list},function(results){iyona.deb("resulTs",results);
+         if("msg" in results)iyona.msg(results.msg); else iyona.msg(results.err,false,"danger");
+         that.scope.opt.listsVal[ref].splice(no,1);
       });
    }
    this.DBenum=function(links,parent,col1,key,type){
@@ -675,7 +747,62 @@ function crud(notitia,$routeParams){
       else {field+=','+val;iyona.deb(field,"third");}
       return field;
    }
-   this.rem=function(){}
+   this.check=function($scope,name){
+      if (name in $scope===false){iyona.deb("The "+name+" cannot be found in the form",$scope); return false;}
+      var frm=$scope[name],invalid=frm.$invalid,x,l,row,title,msg=[],
+      message={"email":"is not a valid email","required":"is required"};iyona.deb("FORM.............",frm.$error);
+      if(invalid){$scope.err=true;$scope.errMsg={};
+         for(var type in frm.$error){l=frm.$error[type].length;
+            for(x=0;x<l;x++){row=frm.$error[type][x];title=ucfirst(row.$name);
+               $scope.errMsg[row.$name]=true;//frm[row.$name].$error[type];
+               msg.push(" "+title+" "+message[type]);
+            }}
+         if(frm){}iyona.deb("SCOPE",frm,msg);
+         $scope.msg=msg.join();return false;}
+      $scope.errMsg=null;$scope.err=false;$scope.msg=null;return true;
+   }
+   this.offlineDuty=function(results){
+      var x,l=(angular.isArray(results))?results.length:0;
+      for(x=0;x<l;x++)notitia.iWrite(defaultMensa,results[x],true);
+   }
+   this.checkboxValue=function($scope,defaultField,field){
+      var e=[],tmpVal,x,l=defaultField.enum.length;
+      var scopeField=$scope.data[field];
+      scopeField = scopeField?scopeField.split(","):[];
+      for(x=0;x<l;x++){
+         tmpVal=defaultField.enum[x];
+         if(scopeField.indexOf(tmpVal)!=-1)e.push(tmpVal);
+         else e.push(null);
+      }
+      $scope.data[field]=e;
+   }
+   this.typeahead=function(){
+      function callBack(e,field){var set=defaultScope.typeahead[field];
+         that.scope.typeahead[field]=that.scope.typeahead[field]||[];
+         var cursor = e.target.result,show;//iyona.deb("Blessing...",field,set,cursor);
+         if(cursor){
+            if(angular.isArray(set.display)){show = {"alpha":cursor.value[set.agro], "display":cursor.value[set.display[0]]+' '+cursor.value[set.display[1]]} }
+            else {show = {"alpha":cursor.value[set.agro],"display":cursor.value[set.agro]}}
+            that.scope.typeahead[field].push(show);cursor.continue();}
+         else {iyona.log("END OF CURSOR+"+field,that.scope.typeahead[field]);}
+}
+      //set typeahead
+      if(defaultScope.typeahead){
+         that.scope.typeahead=that.scope.typeahead||{};
+         for(var field in defaultScope.typeahead){var set=defaultScope.typeahead[field];
+            notitia.iRead(set.mensa,{"where":set.index,"order":"asc"},callBack,field);
+         }
+      }
+   }
+   this.modalMessage=function(msg,callOK,callCancel){
+      var modalInstance=$modal.open({
+         "templateUrl":"cera/templates/ModalContent.html",
+         "windowClass":"modalClass",
+         "controller":modalShow,
+         "resolve":{passing:function(){return msg;}}
+      });
+      modalInstance.result.then(callOK,callCancel);
+   }
 }
 //############################################################################//
 //CRUD                                                                        //

@@ -25,36 +25,36 @@ iyona={
          if(typeof arguments[x]==="function")console.log(encodeURI(arguments[x].toString()));
          else if (typeof arguments[x]==="object") {for (var index in arguments[x]); console.log(arguments[x][index])}
          else console.log(arguments[x]);}},/*for workers or gap application display objects*/
-   log:function(){if(iyona.enableLog){if(arguments[1]!==false)console.log('%c'+arguments[0],'background:#2d79aa;color:#d9edf7;width:100%;display:block;font-weight:bold;',arguments); else console.log('%c'+arguments[0],'background:#ff0000;color:#d9edf7;width:100%;display:block;font-weight:bold;',arguments);}},/*notification msg for the log and all set var*/
+   log:function(){if(iyona.enableLog){console.log('%c'+arguments[0],'background:#2d79aa;color:#d9edf7;width:100%;display:block;font-weight:bold;',arguments);}},/*notification msg for the log and all set var*/
    msg:function(msg,permanent,clss,opt){if(iyona.view){console.log(arguments);clss=clss||'';_$("#notification span").html(msg).removeClass().addClass('blink_me '+clss);if(permanent!==true)setTimeout(function(){_$("#notification span").html("...").removeClass('blink_me');},5000); }},/*debug msg and all set var*/
-   deb:function(){if(iyona.view){if(!PASCO){arguments[arguments.length++]=this.pup();this.pop.apply(console,arguments);}else{this.obj(arguments);} }}/*break down all set var into arr, custom debug msg re-created*/
+   deb:function(){if(iyona.view){if(!PASCO||true){arguments[arguments.length++]=this.pup();this.pop.apply(console,arguments);}else{this.obj(arguments);} }}/*break down all set var into arr, custom debug msg re-created*/
 }
 //============================================================================//STORAGE
 dynamis={
    set:function(_key,_value,_local){
-      var set={},string;set[_key]=_value;string=JSON.stringify(_value);
+      var set={},string,isChrome=(typeof chrome !== "undefined" && chrome.hasOwnProperty("identity"));set[_key]=_value;string=JSON.stringify(_value);
       if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&_local==true){chrome.storage.local.set(set);sessionStorage.setItem(_key,string);}
       else if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&!_local){chrome.storage.sync.set(set);sessionStorage.setItem(_key,string);}
-      else if(_local==true){localStorage.setItem(_key,string);}
+      else if(_local==true && !isChrome){localStorage.setItem(_key,string);}
       else{sessionStorage.setItem(_key,string);}//endif
    },
    get:function(_key,_local){
-      var value;
-      if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&_local==true){chrome.storage.local.get(_key,function(obj){return obj[_key]});return sessionStorage.getItem(_key);}
-      else if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&!_local){chrome.storage.sync.get(_key,function(obj){return obj[_key]});return sessionStorage.getItem(_key);}
-      else if(_local==true){value=localStorage.getItem(_key);return (value&&value.indexOf("{")!=-1)?JSON.parse(value):value;}
+      var value,isChrome=(typeof chrome !== "undefined" && chrome.hasOwnProperty("identity"));
+      if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&_local==true){chrome.storage.local.get(_key,function(obj){return obj[_key]});value=sessionStorage.getItem(_key);return (value&&value.indexOf("{")!=-1)?JSON.parse(value):value;}
+      else if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&!_local){chrome.storage.sync.get(_key,function(obj){return obj[_key]});value=sessionStorage.getItem(_key);return (value&&value.indexOf("{")!=-1)?JSON.parse(value):value;}
+      else if(_local==true && !isChrome){value=localStorage.getItem(_key);return (value&&value.indexOf("{")!=-1)?JSON.parse(value):value;}
       else{value=sessionStorage.getItem(_key);return (value&&value.indexOf("{")!=-1)?JSON.parse(value):value;}//endif
    },
-   del:function(_key,_local){
+   del:function(_key,_local){ var isChrome=(typeof chrome !== "undefined" && chrome.hasOwnProperty("identity"));
       if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&_local==true){chrome.storage.local.remove(_key);sessionStorage.removeItem(_key);}
       else if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&!_local){chrome.storage.sync.remove(_key);sessionStorage.removeItem(_key);}
-      else if(_local==true){localStorage.removeItem(_key);}
+      else if(_local==true && !isChrome){localStorage.removeItem(_key);}
       else{sessionStorage.removeItem(_key);}//endif
    },
-   clear:function(_local){
+   clear:function(_local){ var isChrome=(typeof chrome !== "undefined" && chrome.hasOwnProperty("identity"));
       if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&_local==true){chrome.storage.local.clear();}
       else if(typeof chrome!=="undefined"&&chrome.hasOwnProperty("storage")&&!_local){chrome.storage.sync.clear();}
-      else if(_local==true){localStorage.clear();}
+      else if(_local==true && !isChrome){localStorage.clear();}
       else{sessionStorage.clear();}//endif
    }
 }
@@ -73,7 +73,7 @@ configuration.prototype.config=function(){
    sessionStorage.SITE_UPLOADS=sessionStorage.SITE_URL+'uploads/';
    sessionStorage.MAIL_SUPPORT='fredtma@gmail.com';
    sessionStorage.DB_NAME='rastaa';
-   sessionStorage.DB_VERSION=4;//always integer 4 iDB
+   sessionStorage.DB_VERSION=11;//always integer 4 iDB
    sessionStorage.DB_DESC='The local application Database';
    sessionStorage.DB_SIZE=15;
    sessionStorage.DB_LIMIT=20;
@@ -82,15 +82,17 @@ configuration.prototype.config=function(){
       "Worker":window.hasOwnProperty('Worker'),
       "openDatabase":"openDatabase" in window,
       "indexedDB":"indexedDB" in window||"webkitIndexedDB" in window||"mozIndexedDB" in window||"msIndexedDB" in window,
+      "iDB":true,
       "WebSocket":window.hasOwnProperty('WebSocket'),
       "history":window.hasOwnProperty('history'),
       "formValidation":hasFormValidation(),
       "PASCO":window.PASCO,
       "isOnline":navigator.onLine,
       "Online":true,
-      "projectID":"17238315752"
+      "projectID":"17238315752",
+      "app":(typeof chrome !== "undefined" && chrome.hasOwnProperty("identity"))
    });
-   dynamis.set("EXEMPLAR",JSON.stringify({"username":["^[A-Za-z0-9_]{6,15}$","requires at least six alpha-numerique character"],
+   dynamis.set("EXEMPLAR",{"username":["^[A-Za-z0-9_]{6,15}$","requires at least six alpha-numerique character"],
    "pass1":["((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,20})","requires complex phrase with upperCase, lowerCase, number and a minimum of 6 chars"],
    "pass2":["^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.*\s).*$","requires complex phrase with upperCase, lowerCase, number and a minimum of 6 chars"],
    "password":["(?=^.{6,}$)((?=.*[0-9])|(?=.*[^A-Za-z0-9]+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$","requires upperCase, lowerCase, number and a minimum of 6 chars"],
@@ -103,11 +105,11 @@ configuration.prototype.config=function(){
    "colour":["^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$","requires a valid colour in the form of (#ccc or #cccccc)"],
    "bool":["^1|0","requires a boolean value of 0 or 1"],
    "email":["^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$","the email address is not the right formated"],
-   "single":["^[a-zA-Z0-9]","requires a single value"]}));
+   "single":["^[a-zA-Z0-9]","requires a single value"]});
    var config = dynamis.get("CONFIG"); config.openDatabase=false;config.indexedDB=false;dynamis.set("CONFIG",config);
 return this;
 };
-(function(){var settings= new configuration(); iyona.deb(settings,'settings');settings.config(); })();
+(function(){var settings= new configuration(); settings.config(); })();
 //============================================================================//INNITIATOR
 _$=function(element){return angular.element(document.querySelectorAll(element));}
 //============================================================================//
@@ -248,6 +250,7 @@ ucwords = function (str)
         return $1.toUpperCase();
     });
 }//end function
+ucfirst=function(word){if(!word)return false;; if(!word)return false; return word.charAt(0).toUpperCase() + word.substring(1);}
 //============================================================================//
 /**
  * change into alpha numerical, with no spacing
@@ -366,9 +369,9 @@ helpfullLink=function(_now,_curr){
       _now+=encore;//var collapse=$(".collapse").length;
       if(j.rows.length){
          var row=j[0];var content=row['content'];var title=row['title'];var next=row['option'];var pos=row['position'];
-         var link="<div class='pager small'><ul><li class='previous'><a href='javascript:void(0)' onclick='javascript:$(\""+_now+"\").popover(\"destroy\");' >Close</a></li>";
-         if(next!=='none'&&!def)link+="<li class='next'><a href='javascript:void(0)' onclick='helpfullLink(\""+next+"\",\""+_now+"\")' >Next »</a></li></ul></div>";
-         else if(def)link+="<li class='next'><a href='javascript:void(0)' onclick='helpfullLink(\""+def+"\",\""+_now+"\")' >Next »</a></li></ul></div>";
+         var link="<div class='pager small'><ul><li class='previous'><a href='#' onclick='javascript:$(\""+_now+"\").popover(\"destroy\");' >Close</a></li>";
+         if(next!=='none'&&!def)link+="<li class='next'><a href='#' onclick='helpfullLink(\""+next+"\",\""+_now+"\")' >Next »</a></li></ul></div>";
+         else if(def)link+="<li class='next'><a href='#' onclick='helpfullLink(\""+def+"\",\""+_now+"\")' >Next »</a></li></ul></div>";
          iyona.deb(_now,"_now",$(_now)[0]);
          content=content+link;var len=$(_now).length;if(len>1)_now=$(_now)[0];
          iyona.deb(_now,"_now",$(_now));
@@ -387,7 +390,7 @@ helpfullLink=function(_now,_curr){
  * @param object <var>_next</var> the next hint object
  */
 helpfullNext=function(_now,_next){
-   var next="<br/><a href='javascript:void(0)' class='helpNext' onclick='helpfullNext(\'\')' >Next >></a>";
+   var next="<br/><a href='#' class='helpNext' onclick='helpfullNext(\'\')' >Next >></a>";
    var content=$(_next).data('content')+next;
    $(_now).popover('destroy');
    $(_next).popover({"html":true,"trigger":"click","content":content});$(_next).popover('show');
@@ -551,6 +554,22 @@ function checkConnection() {
 }
 //============================================================================//
 /**
+ * use prototype to add a function that searches an object value
+ * @author fredtma
+ * @version 2.3
+ * @category search, object
+ * @param array </var>value</var> the value to search in the object
+ * @return bool
+ */
+objSearch = function(obj,value){
+    for( var key in obj ) {
+        if(typeof obj[key]==='object' )objSearch(obj[key],value);
+        if(typeof obj[key]==="string"&&obj[key].indexOf(value)!==-1 ) return true;
+    }
+    return false;
+}
+//============================================================================//
+/**
  * calculate the date difference and returns the value in human language.
  * @author fredtma
  * @version 0.5
@@ -574,6 +593,16 @@ function timeDifference(t) {
 }
 //============================================================================//
 /**
+ * initiate the scrolling mechanism with iscroller library
+ * @author fredtma
+ * @version 0.5
+ * @category asthetic
+ */
+function SETiSCROLL (id) {id=id||"#mainContent";return;
+	return new IScroll(id, {scrollbars: true,mouseWheel: true,interactiveScrollbars: true,shrinkScrollbars: 'scale',fadeScrollbars: true, tab:true, click:true});
+}
+//============================================================================//
+/**
  * check the users permission
  * @author fredtma
  * @version 5.9
@@ -583,4 +612,92 @@ function timeDifference(t) {
  */
 function getLicentia(perm) {
    return impetroUser().licencia;
+}
+//============================================================================//
+//GOOGLE API USER DETAILS                                                     //
+//============================================================================//
+function GPLUS_USER() {
+   // @corecode_begin getProtectedData
+   this.access_token, this.user_info,this.callFunction;//public
+   var callback,retry,that=this;//private
+   this.getToken = function(method, url, interactive, callBack) {
+      retry = false;
+      callback = callBack;
+      chrome.identity.getAuthToken({"interactive": interactive}, function(token) {
+         if (chrome.runtime.lastError) {
+            callback(chrome.runtime.lastError); return;
+         }
+         that.access_token = token;
+         that.requestStart(method, url);
+      });
+   }
+
+   this.requestStart = function(method, url) {
+      var xhr = new XMLHttpRequest();
+      xhr.open(method, url);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + this.access_token);
+      xhr.onload = this.requestComplete;
+      xhr.send();
+   }
+
+   this.requestComplete = function() {
+      if (this.status == 401 && retry) {
+         retry = false;
+         chrome.identity.removeCachedAuthToken({token: this.access_token}, this.getToken);
+      } else {
+         callback(null, this.status, this.response);
+      }
+   }
+
+   this.getUserInfo = function(interactive,callFunction) {
+      this.callFunction=callFunction;
+      this.getToken('GET', 'https://www.googleapis.com/plus/v1/people/me', interactive, this.onUserInfoFetched);
+   }
+
+   this.onUserInfoFetched = function(error, status, response) {
+      if (!error && status == 200) {
+         that.user_info = JSON.parse(response);//displayName,image
+         that.callFunction(that.user_info,that.access_token);
+         iyona.deb(that.user_info,that.access_token);
+      } else {
+         that.user_info = {"id":0,"type":0,"emails":[{"value":0}]};
+         that.callFunction(that.user_info,error);
+         iyona.msg("could not retrive user data:"+error.message,false,"danger",error,response);
+      }
+   }
+
+   this.revokeToken = function() {
+      chrome.identity.getAuthToken({'interactive': false},
+      function(current_token) {
+         if (!chrome.runtime.lastError) {
+            chrome.identity.removeCachedAuthToken({token: current_token},
+            function() {
+            });
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://accounts.google.com/o/oauth2/revoke?token=' + current_token);
+            xhr.send();
+         }
+      });
+   }
+};
+//============================================================================//
+//FETCH IMAGE
+//============================================================================//
+var GET_IAMGE = function(url,ele) {
+   this.fetchImageBytes = function(url) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+      xhr.onload = this.onImageFetched;
+      xhr.send();
+   }
+   this.onImageFetched = function(e) {
+      if (this.status != 200) return;
+      var imgElem = document.createElement('img');
+      var objUrl = window.webkitURL.createObjectURL(this.response);
+      imgElem.src = objUrl;
+      var element=document.querySelector(ele);element.appendChild(imgElem);
+      imgElem.onload = function() {window.webkitURL.revokeObjectURL(objUrl);}
+   }
+   this.fetchImageBytes(url);
 }

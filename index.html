@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" ng-app='rastaa'>
+<html lang="en" ng-csp ng-app='rastaa'>
 	<head>
 		<title>Rastaa System</title>
       <meta charset="utf-8" />
@@ -8,11 +8,12 @@
       <meta name="mobile-web-app-capable" content="yes">
       <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
       <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
-<!--      <link rel="shortcut icon" href="img/fav.png" />
+<!--  <link rel="shortcut icon" href="img/fav.png" />
       <link rel="apple-touch-icon" href="res/icon/android/icon-36-ldpi.png"/>
       <link rel="apple-touch-startup-image" href="res/screen/android/screen-mdpi-portrait.png">
       <link rel="shortcut icon" sizes="196x196" href="res/screen/android/screen-mdpi-landscape.png">
-      <link rel="shortcut icon" sizes="128x128" href="res/icon/android/icon-36-ldpi.png">      -->
+      <link rel="shortcut icon" sizes="128x128" href="res/icon/android/icon-36-ldpi.png">
+-->
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
       <link rel="stylesheet" href="css/skel-noscript.css" />
       <link rel="stylesheet" href="css/style.css" />
@@ -25,8 +26,8 @@
 				<div class="top">
                <div id="logo" ng-if="usr">
                   <a href="{{usr.link}}">
-                  <span class="image avatar48"><img ng-src="{{usr.img}}" alt="Admin profile logo" /></span>
-                  <h1 id="title">{{usr.display}}</h1><span class="byline">{{usr.title}}</span>
+                  <span class="image avatar48"><img ng-if="usr.img" ng-src="{{usr.img}}" alt="Admin profile logo" /></span>
+                  <h1>{{usr.display}}</h1><span class="byline">{{usr.title}}</span>
                   </a>
                </div>
                <nav id="nav" class="navLeft">
@@ -40,13 +41,13 @@
 				</div>
 			</div>
          <section id="father" class="container-fluid slide-animate-container">
-            <header ng-if="breadcrum" class="menuHeader">
+            <header ng-if="menu" class="menuHeader">
                <ol class="breadcrumb">
-                  <li ng-if="breadcrum[0]!==false"><a href="#genesis">Home</a></li>
-                  <li ng-repeat="bread in breadcrum" ng-if="bread!==false" class="{{bread.class}}"><a ng-if="bread.link" href="{{bread.link}}">{{bread.text}}</a><span class="bread-span"  ng-if="!bread.link">{{bread.text}}</span></li>
+                  <li ng-if="menu[0]!==false"><a href="#genesis">Home</a></li>
+                  <li ng-repeat="bread in menu" ng-if="bread!==false" class="{{bread.class}}"><a ng-if="bread.link" href="{{bread.link}}">{{bread.text}}</a><span class="bread-span"  ng-if="!bread.link">{{bread.text}}</span></li>
                </ol>
                <a ng-if="crud.alpha" ng-href="{{crud.alpha}}" class="crud1 fa fa-plus success"></a>
-               <a ng-if="crud.omega" ng-href="#" ng-click="delete()" class="crud0 fa fa-minus danger"></a>
+               <a ng-if="crud.omega" ng-click="delete()" class="crud0 fa fa-minus danger link"></a>
             </header>
             <article id="main" class="slide-animate" ng-view></article>
          </section>
@@ -59,8 +60,6 @@
 						</ul>
 					</div>
 			</div>
-      <script type="text/javascript" src="lib/jquery/jquery.min.js"></script>
-      <script type="text/javascript" src="lib/bootstrap/bootstrap.min.js"></script>
       <script type="text/javascript" src="js/lib.muneris.js"></script>
       <script type="text/javascript" src="js/lib.consuetudinem.js"></script>
       <script type="text/javascript" src="lib/angular/angular.min.js"></script>
@@ -72,5 +71,6 @@
       <script type="text/javascript" src="js/app.controllers.js"></script>
       <script type="text/javascript" src="js/app.services.js"></script>
       <script type="text/javascript" src="js/app.filters.js"></script>
+      <script type="text/javascript" src="lib/bootstrap/ui-bootstrap-0.9.0.min.js"></script>
 	</body>
 </html>

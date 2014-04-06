@@ -1,6 +1,6 @@
 <article id="detailView"  ng-controller="exodus">
    <section class="">
-      <form id="userForm" ng-submit="login()" >
+      <form id="userForm" name="dataForm" ng-submit="login(dataForm)" >
          <div id='srvModified' class="input-group">
             <span class="input-group-addon glyphicon glyphicon-user"></span>
             <input type="text" class="form-control" required placeholder="Username or Email" autofocus name="username" ng-model="data.username" />
