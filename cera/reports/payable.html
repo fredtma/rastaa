@@ -47,13 +47,16 @@
                      <input type="text" class="form-control borderless" placeholder="Date created" title="Date created" ng-model="data.created" datepicker-popup is-open="start_date.open" min="start_date.minDate"   />
                   </dd>
                   <dt>Signature 1</dt><dd>
-                     <input type="text" form="dataForm" class="form-control borderless" required placeholder="First signature" title="First signature" id="signature1" name="signature1" ng-model="data.signature1"  typeahead="value as value.display for value in typeahead.signature1 | filter:{display:$viewValue} | limitTo:5"/>
+                     <select class="form-control borderless" form="dataForm" id="signature1" required name="signature1" ng-model="data.signature1" ng-options="value as value.display for value in typeahead.signature1">
+                        <option value=""> -- Select signature -- </option>
+                     </select>
+                     <!--<input type="text" form="dataForm" class="form-control borderless" required placeholder="First signature" title="First signature" id="signature1" name="signature1" ng-model="data.signature1"  typeahead="value as value.display for value in typeahead.signature1 | filter:{display:$viewValue} | limitTo:5"/>-->
                   </dd>
                   <dt>Signature 2</dt><dd>
-                     <input type="text" form="dataForm" class="form-control borderless" required placeholder="Second signature" title="Second signature" id="signature2" name="signature2" ng-model="data.signature2"  typeahead="value as value.display for value in typeahead.signature2 | filter:{display:$viewValue} | limitTo:5"/>
-                  </dd>
-                  <dt>Supervisor</dt><dd>
-                     <output type="text" form="dataForm" class="form-control borderless" required placeholder="Supervisor" title="Supervisor" id="supervisor" name="supervisor" ng-model="data.supervisor" >{{data.supervisor}}</output>
+                     <select class="form-control borderless" form="dataForm" id="signature2" required name="signature2" ng-model="data.signature2" ng-options="value as value.display for value in typeahead.signature2">
+                        <option value=""> -- Select signature -- </option>
+                     </select>
+                     <!--<input type="text" form="dataForm" class="form-control borderless" required placeholder="Second signature" title="Second signature" id="signature2" name="signature2" ng-model="data.signature2"  typeahead="value as value.display for value in typeahead.signature2 | filter:{display:$viewValue} | limitTo:5"/>-->
                   </dd>
                </dl>
             </div>
@@ -64,7 +67,11 @@
          </div>
          <!--navigation row-->
          <div class="row">
-            <div class='col-xs-12 bg-info small-row'>&nbsp;</div>
+            <div class='col-xs-12 bg-info small-row'>
+               <h5 class="payableH5">Select Bank </h5>
+               <button ng-repeat="(key,set) in opt.banks" form="dataForm" required type="button" class="btn btn-primary" ng-model="data.bank_ref"  btn-radio="'{{set.jesua}}'" >{{set.name}} </button>
+               <small ng-if="data.bank_ref" ng-bind="'Balance: '+opt.banks[data.bank_ref].balance+' '+opt.banks[data.bank_ref].currency "></small>
+            </div>
          </div>
          <!--content row-->
          <div class="row repContent">
@@ -77,8 +84,8 @@
                         <th class=''><a class="link" ng-click="order('due_date')">Due Date</a></th>
                         <th class=''><a class="link" ng-click="order('supplier_name')">Supplier</a></th>
                         <th class=''><a class="link" ng-click="order('project_name')">Project</a></th>
+                        <th class=''><a class="link" ng-click="order('innitiator')">Created By</a></th>
                         <th class=''><a class="link" ng-click="order('approver')">Approver</a></th>
-                        <th class=''><a class="link" ng-click="order('bank')">Bank</a></th>
                         <th class=''><a class="link" ng-click="order('status')">Status</a></th>
                         <th class=''><a class="link" ng-click="order('amount_due')">Amount</a></th>
                         <th class=''><a class="link" ng-click="order('currency')">Currency</a></th>
@@ -93,12 +100,20 @@
                         <td class=''>{{row.due_date}}</td>
                         <td class=''>{{row.supplier_name}}</td>
                         <td class=''>{{row.project_name}}</td>
+                        <td class=''>{{row.innitiator}}</td>
                         <td class=''>{{row.approver}}</td>
-                        <td class=''>{{row.bank}}</td>
                         <td class=''>{{row.status}}</td>
                         <td class=''>{{row.amount_due}}</td>
                         <td class=''>{{row.currency}}</td>
-                        <td class=' opt'><input type="checkbox" ng-model="row.payable_ref" ng-true-value="{{data.reference}}" ng-false-value="0" /></td>
+                        <td class=' opt'>
+                           <input type="checkbox" ng-click="sum(row.amount_due,row.payable_ref,row.currency)" ng-model="row.payable_ref" ng-true-value="{{data.jesua}}" ng-false-value="0" />
+                        </td>
+                     </tr>
+                     <tr>
+                        <td colspan="9" style="text-align:right;font-weight:bold;">TOTAL</td>
+                        <td>{{opt.total}}</td>
+                        <td>{{currency}}</td>
+                        <td>&nbsp;</td>
                      </tr>
                   </tbody>
                </table>

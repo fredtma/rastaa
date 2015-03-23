@@ -96,30 +96,31 @@
          </div>
          </form>
          <hr/>
-         <div ng-repeat="(ref,lists) in opt.listsConf" class="table-responsive panel panel-primary">
+         <div ng-if="data.jesua" ng-repeat="(ref,lists) in opt.listsConf" class="table-responsive panel panel-primary">
             <div class="panel-heading"><h3 class="panel-title">{{lists.title}}. &nbsp;&nbsp;<small class="white" ng-show="!opt.listsVal">Click the bill below to see more details</small> </h3></div>
             <div class="panel-body">
                <table class="table table-hover table-condensed table-dynamic table-list">
                   <thead>
                      <tr>
-                        <th>#</th><th>Bank</th><th>Branch Code</th><th>Account Number</th><th>Swift</th>
+                        <th>#</th><th>Bank</th><th>Branch Code</th><th>Account Number</th><th>Swift</th><th width='5%'><a href='#accounts/new' class="glyphicon glyphicon-plus text-info" title="Add a new item"></a></th>
                      </tr>
                   </thead>
                   <tbody>
                      <tr ng-repeat="(key,list) in opt.listsVal[ref]">
                         <td>{{key+1}}</td>
-                        <td><a href="#bills/view/{{list.jesua}}" class="link" >{{list.name}}</a></td>
-                        <td><a href="#bills/view/{{list.jesua}}" class="link" >{{list.code}}</a></td>
-                        <td><a href="#bills/view/{{list.jesua}}" class="link" >{{list.account_number}}</a></td>
-                        <td><a href="#bills/view/{{list.jesua}}" class="link" >{{list.swift}}</a></td>
+                        <td><a href="#accounts/view/{{list.jesua}}" class="link" >{{list.name}}</a></td>
+                        <td><a href="#accounts/view/{{list.jesua}}" class="link" >{{list.code}}</a></td>
+                        <td><a href="#accounts/view/{{list.jesua}}" class="link" >{{list.account_number}}</a></td>
+                        <td><a href="#accounts/view/{{list.jesua}}" class="link" >{{list.swift}}</a></td>
+                        <td><a href="#accounts/view/{{list.jesua}}" >View</a></td>
                      </tr>
                   </tbody>
                   <tfoot ng-if="opt.listsVal">
-                     <tr><td colspan="5">&nbsp;<a href="#banks/new" class="glyphicon glyphicon-plus text-info link" title="Add a new item">&nbsp;Click here to add new bank.</a></td></tr>
+                     <tr><td colspan="6">&nbsp;<a href="#accounts/new" class="glyphicon glyphicon-plus text-info link" title="Add a new item">&nbsp;Click here to add new account.</a></td></tr>
                   </tfoot>
                </table>
             </div>
          </div>
-      </section><small ng-show="false">{{data|json}} <hr/> {{btnClass|json}} <hr/> {{opt|json}}</small>
+      </section>
    </section>
 </article>

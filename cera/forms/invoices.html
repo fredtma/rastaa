@@ -1,0 +1,217 @@
+<article  ng-controller="invoicesCtrl">
+   <section id="listView" ng-if="view=='list'">
+      <section id="mainContent" class="listing">
+         <ul class="list-group profile-listing">
+         <li class=" " ng-repeat="row in data">
+            <div class="cols1">
+               <span ng-class="'item-icon fa fa-usd text-warning'"></span>
+            </div>
+            <div class="cols2">
+               <a href="#invoices/view/{{row.jesua}}">
+                  <h4>
+                     {{row.name}} <small>{{row.client_name}}</small>
+                  </h4>
+                  <small><span ng-if='row.transaction_number'>{{row.transaction_number}}, </span> <span ng-if='row.amount_due'>{{row.amount_due}},</span> <span ng-if='row.date_due'>{{row.date_due}}.</span></small>
+               </a>
+            </div>
+         </li>
+         </ul>
+      </section>
+   </section>
+   <section id="detailView"  ng-if="view=='new'||view=='view'">
+      <section class=""><span id="messager" ng-class="'help-block '+{true:'text-danger',false:'text-info'}[err]" ng-show="msg">{{msg}}</span>
+         <form id="dataForm" ng-submit="submit(dataForm)" name='dataForm' novalidate>
+         <input type="hidden" class="form-control" ng-model="data.jesua" />
+         <input type="hidden" class="form-control" ng-model="data.modified" />
+         <div class="form-group">
+            <label for="name" >Invoice Number</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.name]">
+                  <span class="input-group-addon glyphicon glyphicon-tags"></span>
+                  <input type="text" class="form-control" required autofocus  autocomplete="off" placeholder="Invoice Description or Name" title="Invoice name" name="name" id="name" ng-model="data.name"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="client_name" >Client's Name</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.client_name]">
+                  <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
+                  <input type="text" class="form-control" required placeholder="The Client Name" title="The Client Name" id="client_name" name="client_name" ng-model="data.client_name"  typeahead="value as value.display for value in typeahead.client_name | filter:{display:$viewValue} | limitTo:5"/>
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="expense" >Invoice Expenses Category</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.expense]">
+                  <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
+                  <select class="form-control" required  id="expense" name="expense" ng-model="data.expense" ng-options="expense for expense in opt.extra.expense.enum ">
+                     <option value=""> -- Select invoice expense -- </option>
+                  </select>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.expense=='Project'">
+            <label for="project_name" >The Project Name</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.project_name]">
+                  <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                  <input type="text" class="form-control" placeholder="The Project name" title="The Project name" name="project_name" id='project_name' ng-model="data.project_name"  typeahead="value as value.display for value in typeahead.project_name | filter:{display:$viewValue} | limitTo:5"/>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.expense=='Other Interco corporate expenses'">
+            <label for="expenseOthers" >Other Interco Corporate Expenses {{data.expenseOthers}}</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.expenseOthers]">
+                  <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                  <button ng-repeat="key in opt.extra.expenseOthers.enum" name="expenseOthers" id="expenseOthers" type="button" class="btn btn-primary" ng-click="categoryOther(key)" >{{key}}</button>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.expense!='Project'">
+            <label for="revenue" >Invoice Revenue Section</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.revenue]">
+                  <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
+                  <select class="form-control" id="revenue" name="revenue" ng-model="data.revenue" ng-options="revenue for revenue in opt.extra.revenue.enum ">
+                     <option value=""> -- Select invoice revenue -- </option>
+                  </select>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.revenue=='Other Interco corporate revenues'">
+            <label for="revenueOthers" >Other Interco Corporate Revenue {{data.revenueOthers}}</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.revenueOthers]">
+                  <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                  <button ng-repeat="key in opt.extra.revenueOthers.enum" name="revenueOthers" id="revenueOthers" type="button" class="btn btn-primary" ng-click="categoryOther(key,true)" >{{key}}</button>
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="amount_due" >Amount Due</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.amount_due]">
+                  <span class="input-group-addon fa fa-usd"></span>
+                  <input type="text" class="form-control" required placeholder="Total amount due" title="Total amount due" name="amount_due" id="amount_due" ng-model="data.amount_due"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group"  ng-if="data.jesua">
+            <label for="amount_paid">Amount Paid</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.amount_paid]">
+                  <span class="input-group-addon fa fa-usd"></span>
+                  <input type="text" class="form-control"  placeholder="Current amount paid" title="Current amount paid" name="amount_paid" id="amount_paid" ng-model="data.amount_paid"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="status" >Currency</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.currency]">
+                  <span class="input-group-addon glyphicon  fa fa-money"></span>
+                  <button ng-repeat="key in opt.extra.currency.enum" type="button" class="btn btn-primary" ng-model="data.currency"  btn-radio="'{{key}}'" >{{key}}</button>
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="due_date" >Due Date</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.due_date]">
+                  <span class="input-group-addon glyphicon glyphicon-calendar"></span>
+                  <input type="text" class="form-control" placeholder="Project Due Date" title="Project Due Date" ng-model="data.due_date" datepicker-popup is-open="due_date.open" min="due_date.minDate"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.expense=='Project'">
+            <label for="general_description">General Description</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.general_description]">
+                  <span class="input-group-addon glyphicon glyphicon-pushpin"></span>
+                  <textarea class="form-control" placeholder="Supplier's description" title="Supplier's description" name="general_description" id="general_description" ng-model="data.general_description">
+                  </textarea>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.expense!='Project'">
+            <label for="description">Description <small>(for IT projects)</small></label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.description]">
+                  <span class="input-group-addon glyphicon glyphicon-pushpin"></span>
+                  <textarea class="form-control" placeholder="Supplier's description" title="Supplier's description" name="description" id="description" ng-model="data.description">
+                  </textarea>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.jesua">
+            <label for="status" >Status</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.status]">
+                  <span class="input-group-addon  fa fa-briefcase"></span>
+                  <button ng-repeat="key in opt.extra.status.enum" type="button" class="btn btn-primary" ng-model="data.status"  btn-radio="'{{key}}'" >{{key}}</button>
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="innitiator" >Innitiator</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.innitiator]">
+                  <span class="input-group-addon fa fa-user"></span>
+                  <output class="form-control" required name="innitiator" id="innitiator" ng-model="data.innitiator">{{data.innitiator}}</output>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="data.jesua">
+            <label for="approver" >Approver</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.approver]">
+                  <span class="input-group-addon fa fa-gavel fa-font"></span>
+                  <input type="text" class="form-control" placeholder="Purchase Order Approver" title="Purchase Order Approver" name="approver" id="approver" ng-model="data.approver"  typeahead="value as value.display for value in typeahead.approver | filter:{display:$viewValue} | limitTo:5" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="opt.reference">
+            <h4 class="refSection">{{opt.foreign[key].title}}</h4>
+            <div>
+               <div ng-repeat="(key,links) in opt.reference" >
+                  <div class="input-group btn-group" data-toggle="buttons" ng-init="col1=opt.foreign[key].col1;col2=opt.foreign[key].col2;parent=data[opt.foreign[key].parent];type=opt.foreign[key].type;">
+                     <span class="input-group-addon glyphicon glyphicon-book"></span>
+                     <lable ng-repeat="(k,link) in links.rows" ng-init="temp=link[col1]" ng-class="'btn btn-primary '+{true:'active'}[temp!=null]" ng-click="DBenum(links,parent,col1,k,type); ">
+                        <input type="{{type||'checkbox'}}" name="title" ng-model="link[col2]" ng-value="true" />{{link[col2]}}</lable>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div ng-if="licentia.deLta||data.jesua==prima||true" ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+            <button type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
+         </div>
+         </form>
+         <div ng-repeat="(ref,lists) in opt.listsConf" class="table-responsive panel panel-primary">
+            <div class="panel-heading"><h3 class="panel-title">{{lists.title}}. <small class="white" ng-show="!opt.listsVal">Click on the add(+) icon to add new items</small> </h3></div>
+            <div class="panel-body">
+               <table class="table table-hover table-condensed table-dynamic">
+                  <thead>
+                     <tr>
+                        <th>#</th><th>Name</th><th>Description</th><th><span ng-click="addItem(ref)" class="glyphicon glyphicon-plus info" title="Add a new item"></span></th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr ng-repeat="(key,list) in opt.listsVal[ref]">
+                        <td>{{key+1}}</td><td><input type="text" placeholder="Add a name here" name="listName[]" ng-model="list.lists_name" /></td>
+                        <td><input ng-blur="savItem(ref,list)" type="text" placeholder="Add a description here" name="listDesc[]" ng-model="list.description" /></td>
+                        <td><span ng-click="remItem(key,ref,list)" class="glyphicon glyphicon-remove danger" title="Remove this item"></span><input type="hidden" name="isNew[]" ng-model="list.isNew" /></td>
+                     </tr>
+                  </tbody>
+                  <tfoot ng-if="opt.listsVal">
+                  <td colspan="3">&nbsp;</td>
+                  <td><span ng-click="submit(dataForm)" class="glyphicon glyphicon-ok success" title="Save all items"></span></td>
+                  </tfoot>
+               </table>
+            </div>
+         </div>
+      </section>
+   </section>
+</article>

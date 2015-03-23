@@ -26,7 +26,7 @@
          <div class="form-group">
             <label for="name" >Project Name</label>
             <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.name]">
                   <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
                   <input type="text" class="form-control" required autocomplete="off" placeholder="Project's name" title="Project's name" autofocus id="name" name="name" ng-model="data.name" />
                </div></div>
@@ -34,7 +34,7 @@
          <div class="form-group">
             <label for="project_manager" >Project Manager</label>
             <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.project_manager]">
                   <span class="input-group-addon glyphicon glyphicon-barcode"></span>
                   <input type="text" class="form-control" required placeholder="Project Manager Name" title="Project Manager Name" name="code" id='project_manager' ng-model="data.project_manager" typeahead="value as value.display for value in typeahead.project_manager | filter:{display:$viewValue} | limitTo:5" />
                </div>
@@ -43,7 +43,7 @@
          <div class="form-group">
             <label for="start_date" >Start Date</label>
             <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.start_date]">
                   <span class="input-group-addon glyphicon glyphicon-calendar"></span>
                   <!--<input type="date" class="form-control" required placeholder="Start Date" title="Start Date" name="start_date" id="start_date" ng-model="data.start_date"  />-->
                   <input type="text" class="form-control" required placeholder="Start Date" title="Start Date" name="start_date" id="start_date" ng-model="data.start_date" datepicker-popup is-open="start_date.open" min="start_date.minDate"  />
@@ -53,7 +53,7 @@
          <div class="form-group">
             <label for="end_date" >End Date</label>
             <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.end_date]">
                   <span class="input-group-addon glyphicon glyphicon-calendar"></span>
                   <!--<input type="date" class="form-control" required placeholder="End Date" title="End Date" name="end_date" id="end_date" ng-model="data.end_date"  />-->
                   <input type="text" class="form-control" required placeholder="End Date" title="End Date" name="end_date" id="end_date" ng-model="data.end_date" datepicker-popup is-open="end_date.open" min="end_date.minDate"  />
@@ -63,7 +63,7 @@
          <div class="form-group">
             <label for="description" >Project Description</label>
             <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.description]">
                   <span class="input-group-addon glyphicon glyphicon-comment"></span>
                   <textarea class="form-control" required placeholder="Project Description" title="Project Description" name="description" id="description" ng-model="data.description"  >
                   </textarea>

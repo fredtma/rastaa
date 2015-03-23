@@ -19,7 +19,7 @@ $routeProvider
    .when('/pettyHistory/:view?/:jesua?',{templateUrl:'cera/forms/pettyHistory.html'})
    .when('/invoices/:view?/:jesua?',{templateUrl:'cera/forms/invoices.html'})
    .when('/payable/:view?/:jesua?',{templateUrl:'cera/reports/payable.html'})
-   .when('/reports/:report?',{templateUrl:'cera/reports/tabular-report.html'})
+   .when('/reportAll/:report?',{templateUrl:'cera/reports/reports.html'})
    .when('/contact?', {templateUrl: 'cera/contacts.html'})
    .when('/purchases/:view?/:jesua?', {templateUrl: 'cera/forms/purchases.html'})
    .otherwise({redirectTo: '/genesis'});
@@ -31,10 +31,9 @@ $routeProvider
       {"id":"portfolio","span":"fa-truck","text":"Suppliers","link":"#suppliers/list"},
       {"id":"purchases","span":"fa-usd","text":"Approval for payments","link":"#bills/list"},
       {"id":"payable","span":"fa-list-alt","text":"Accounts Payable","link":"#payable/list"},
-      {"id":"banks","span":"fa-euro","text":"Company Banks","link":"#banks/list"},
       {"id":"projects","span":"fa-suitcase","text":"Projects","link":"#projects/list"},
       {"id":"pettyCash","span":"fa-money","text":"Petty Cash","link":"#petty/list"},
-      {"id":"report","span":"fa-briefcase","text":"Report","link":"#reports"}];
+      {"id":"contact","span":"fa-envelope","text":"Contact","link":"#contact"}];
    $rootScope.icons=[
       {"link":"#profile","class":"fa-user","text":"Profile"},
       {"link":"#clients","class":"fa-group","text":"Clients"},
@@ -149,7 +148,7 @@ configuration.prototype.eternal=function(){
       "bills":{
         "mensa":"bills",
         "creation":{"jesua":{"type":"TEXT"},"created":{"type":"DATETIME"},"modified":{"type":"TIMESTAMP","default":"CURRENT_TIMESTAMP"},"name":{"type":"TEXT","ndx":"ndxBillName"},"supplier_name":{"type":"TEXT","ndx":"ndxSupplierName"},"project_name":{"type":"TEXT","ndx":"ndxProjectName"},"bank_name":{"type":"TEXT","ndx":"ndxBankNameRef"},"currency":{"type":"TEXT"},"amount_due":{"type":"REAL","ndx":"ndxBillAmount"},"amount_paid":{"type":"REAL"},"due_date":{"type":"DATETIME"},"innitiator":{"type":"TEXT","ndx":"ndxBillInit"},"approver":{"type":"TEXT","ndx":"ndxBillApp"},"transaction_number":{"type":"TEXT"},"status":{"type":"TEXT"},"reference_bottom":{"type":"TEXT"}},
-        "extra":{"status":{"enum":['Paid','Cancel','Approved','Innitiated']},"currency":{"enum":['USD','EUR','GBP','ZAR','AKZ']}},
+        "extra":{"status":{"enum":['Paid','Cancel','Innitiated']},"currency":{"enum":['USD','EUR','GBP','ZAR','AKZ']}},
         "typeahead":{
            "supplier_name":{"mensa":"companies","agro":"name","index":"uniq_name"},
 //           "bank_name":{"mensa":"banks","agro":"account_number","display":["supplier_name","name"],"index":"uniq_account_number"},
@@ -167,7 +166,7 @@ configuration.prototype.eternal=function(){
       "invoices":{
         "mensa":"invoices",
         "creation":{"jesua":{"type":"TEXT"},"created":{"type":"DATETIME"},"modified":{"type":"TIMESTAMP","default":"CURRENT_TIMESTAMP"},"name":{"type":"TEXT","ndx":"ndxBillName"},"expense":{"type":"TEXT","ndx":"ndxExpPrj"},"revenue":{"type":null},"client_name":{"type":"TEXT","ndx":"ndxClientName"},"currency":{"type":"TEXT"},"amount_due":{"type":"REAL","ndx":"ndxInvoiceAmount"},"amount_paid":{"type":"REAL"},"due_date":{"type":"DATETIME"},"innitiator":{"type":"TEXT","ndx":"ndxBillInit"},"approver":{"type":"TEXT","ndx":"ndxBillApp"},"transaction_number":{"type":"TEXT"},"status":{"type":"TEXT"},"general_description":{"type":"TEXT"},"description":{"type":"TEXT"}},
-        "extra":{"status":{"enum":['Paid','Sent to bank','Approved','Cancel','Innitiated']},"currency":{"enum":['USD','EUR','GBP','ZAR','AKZ']},"expense":{"enum":['Project','Overhead expenses','Taxes','Salaries.','Capex expenses','Dividend paid','Royalties expenses','Management fees expenses','Other Local corporate expenses','Other Interco corporate expenses',' Financial Expenses']},"expenseOthers":{"enum":["Technip France","Technip Angola","Technip UK","Angoflex SA","Duco","To Be Add"]},"revenue":{"enum":["Subsidies revenues","Refund taxes","Royalties revenues","Management fees revenues","Dividend received","Other Interco corporate revenues"," Financial Revenues"]},"revenueOthers":{"enum":["Technip France","Technip Angola","Technip UK","Angoflex SA","Duco","To Be Add"]} },
+        "extra":{"status":{"enum":['Paid','Sent to bank','Cancel','Innitiated']},"currency":{"enum":['USD','EUR','GBP','ZAR','AKZ']},"expense":{"enum":['Project','Overhead expenses','Taxes','Salaries.','Capex expenses','Dividend paid','Royalties expenses','Management fees expenses','Other Local corporate expenses','Other Interco corporate expenses',' Financial Expenses']},"expenseOthers":{"enum":["Technip France","Technip Angola","Technip UK","Angoflex SA","Duco","To Be Add"]},"revenue":{"enum":["Subsidies revenues","Refund taxes","Royalties revenues","Management fees revenues","Dividend received","Other Interco corporate revenues"," Financial Revenues"]},"revenueOthers":{"enum":["Technip France","Technip Angola","Technip UK","Angoflex SA","Duco","To Be Add"]} },
         "typeahead":{
            "client_name":{"mensa":"companies","agro":"name","index":"uniq_name"},
            "approver":{"mensa":"users","agro":"username","display":["firstname","lastname"],"index":"uniq_username"},
@@ -217,8 +216,10 @@ configuration.prototype.eternal=function(){
         "consuetudinem":"itemsReport",
         "itemsConf":{
             "bills":{
-               "fields":["payable_ref","status"],
-               "parent":["blossom","Paid"]
+               "fields":{"project_name":null,"jesua":null,"name":{"alpha":"a new AFP"},"supplier_name":{"alpha":"the supplier's name"},"amount_due":{"alpha":0},"status":{"alpha":"pending"}},
+               "parent":"name","ref":null,"title":"Associate project bill"} }
+//               "fields":["payable_ref"],
+//               "parent":["reference"]
             }
          }
       },
@@ -234,7 +235,6 @@ configuration.prototype.eternal=function(){
           "list":[{"text":"Bank Account List","class":"active"}],
           "alpha":"#banks/new"
         },
-        "consuetudinem":"list-items",
         "listsConf":{
          "bank_history":{
             "fields":{"bank_ref":null,"receipt_no":null,"jesua":null,"withdrawn":{"alpha":null},"deposit":{"alpha":null},"received_by":{"alpha":null},"approved_by":{"alpha":null},"modified":{"alpha":null},"currency":{"alpha":null}},
@@ -247,7 +247,7 @@ configuration.prototype.eternal=function(){
         "typeahead":{
            "approved_by":{"mensa":"users","index":"uniq_username","agro":"username","display":["firstname","lastname"]},
            "received_by":{"mensa":"users","index":"uniq_username","agro":"username","display":["firstname","lastname"]},
-           "bank_ref":{"mensa":"banks","index":"ndxBankName","agro":"name"}
+           "petty_ref":{"mensa":"petty_cash","index":"ndxAcc","agro":"account"}
         },
         "details":{"created":"NOW()", "modified":"NOW()","jesua":null,"bank_ref":null,"receipt_no":null,"description":null,"withdrawn":null,"deposit":null,"received_by":null,"approved_by":null,"currency":null},
         "list":{"modified":null,"bank_ref":null,"receipt_no":null,"withdrawn":null,"deposit":null,"received_by":null,"currency":null},
@@ -256,18 +256,14 @@ configuration.prototype.eternal=function(){
           "list":[{"text":"List of Transaction","class":"active"}],
           "alpha":"#bankHistory/new"
         },
-        "consuetudinem":["list-items"],
-        "listsConf":{
-         "petty_cash":{
-            "fields":{"name":null,"jesua":null,"balance":null,"account":null,"currency":null},
-				"parent":"blossom","ref":null,"title":"Petty Cash History","seek":true} }
+        "consuetudinem":"novum-history"
      },
       "petty":{
         "mensa":"petty_cash",
-        "creation":{"jesua":{"type":"TEXT","key":true},"created":{"type":"DATETIME"},"modified":{"type":"TIMESTAMP","default":"CURRENT_TIMESTAMP"},"name":{"type":"TEXT","ndx":"ndxNamePetty"},"balance":{"type":"REAL"},"account":{"type":"TEXT","ndx":"ndxAcc"},"currency":{"type":"TEXT"}},
+        "creation":{"jesua":{"type":"TEXT","key":true},"created":{"type":"DATETIME"},"modified":{"type":"TIMESTAMP","default":"CURRENT_TIMESTAMP"},"balance":{"type":"REAL"},"account":{"type":"TEXT","ndx":"ndxAcc"},"currency":{"type":"TEXT"}},
         "extra":{"currency":{"enum":['USD','EUR','GBP','ZAR','AKZ']}},
-        "details":{"created":"NOW()", "modified":"NOW()","jesua":null,"name":null,"balance":null,"account":null,"currency":null},
-        "list":{"balance":null,"name":null,"account":null,"currency":null},
+        "details":{"created":"NOW()", "modified":"NOW()","jesua":null,"balance":null,"account":null,"currency":null},
+        "list":{"balance":null,"account":null,"currency":null},
         "menu":{
           "details":[{"text":"List Of Petty Cash","link":"#petty/list"},{"text":"Petty Cash","class":"active"}],
           "list":[{"text":"List of Petty Cash","class":"active"}],
@@ -290,41 +286,6 @@ configuration.prototype.eternal=function(){
         },
         "details":{"created":"NOW()", "modified":"NOW()","jesua":null,"petty_ref":null,"receipt_no":null,"description":null,"withdrawn":null,"deposit":null,"received_by":null,"approved_by":null,"currency":null},
         "list":{"modified":null,"petty_ref":null,"receipt_no":null,"withdrawn":null,"deposit":null,"received_by":null,"currency":null},
-        "menu":{
-          "details":[{"text":"List Of Petty Cash History","link":"#pettyHistory/list"},{"text":"Petty History","class":"active"}],
-          "list":[{"text":"List of Petty Cash  History","class":"active"}],
-          "alpha":"#pettyHistory/new"
-        },
-        "consuetudinem":"novum-history"
-     },
-      "system reports":{
-         "mensa":"bills",
-         "reports":{
-            "payment view":{
-               "mensa":
-               {
-                  "a":{"mensa":"bills"},
-                  "init":{"type":"left","mensa":"users","on":"innitiator","agro":"username"},
-                  "apr":{"type":"left","mensa":"users","on":"approver","agro":"username"}
-               },
-               "iscroll":false,
-               "graph":false,
-               "report":true,
-               "graphTitle":"Data usage by Clients",
-               "graphType":"bar",
-               "fields":{
-                  "created":{"title":"Created","alpha":null},
-                  "due_date":{"title":"Due Date","alpha":null},
-                  "name":{"title":"Payment","alpha":null},
-                  "supplier_name":{"title":"Supplier Name","alpha":null},
-                  "amount_due":{"title":"Amount Due","alpha":null},
-                  "currency":{"title":"Currency","alpha":null},
-                  "innitiator":{"title":"Innitiator","alpha":null,"mensa":"init","eta":{"type":"join","agro":["firstname","lastname"]}},
-                  "approver":{"title":"Approver","alpha":null,"mensa":"apr","eta":{"type":"join","agro":["firstname","lastname"]}},
-                  "status":{"title":"Status","alpha":null}
-               }
-           }
-        },
         "menu":{
           "details":[{"text":"List Of Petty Cash History","link":"#pettyHistory/list"},{"text":"Petty History","class":"active"}],
           "list":[{"text":"List of Petty Cash  History","class":"active"}],

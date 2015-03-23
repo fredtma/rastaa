@@ -5,11 +5,17 @@ angular.module('rastaa.controllers', [])
         .controller('modalShow',['$scope','$modalInstance','passing',modalShow])
         .controller('usersCtrl', ['$scope','$routeParams','crud',usersCtrl])
         .controller('banksCtrl', ['$scope','$routeParams','crud',banksCtrl])
+        .controller('bankHistoryCtrl', ['$scope','$routeParams','crud',bankHistoryCtrl])
+        .controller('accountsCtrl', ['$scope','$routeParams','crud',accountsCtrl])
         .controller('suppliersCtrl', ['$scope','$routeParams','crud',suppliersCtrl])
         .controller('billsCtrl', ['$scope','$routeParams','crud','notitia',billsCtrl])
+        .controller('pettyCtrl', ['$scope','$routeParams','crud',pettyCtrl])
+        .controller('pettyHistoryCtrl', ['$scope','$routeParams','crud',pettyHistoryCtrl])
+        .controller('clientsCtrl', ['$scope','$routeParams','crud','notitia',clientsCtrl])
+        .controller('invoicesCtrl', ['$scope','$routeParams','crud',invoicesCtrl])
         .controller('projectsCtrl', ['$scope','$routeParams','crud',projectsCtrl])
-        .controller('rptAFP', ['$scope','$routeParams','crud','fetch',rptAFP])
-        .controller('clientsCtrl', ['$scope','$routeParams',exodus]);
+        .controller('tabularCtrl', ['$scope','crud','$routeParams','fetch','$timeout',tabularCtrl])
+        .controller('rptAFP', ['$scope','$routeParams','crud','fetch',rptAFP]);
 //============================================================================//
 function bethel($scope,$rootScope){$rootScope.menu=[];}
 //============================================================================//
@@ -89,8 +95,8 @@ function usersCtrl($scope,$routeParams,crud){
    $scope.$on("readyForm",function(e,server){});
 }
 //============================================================================//
-function banksCtrl($scope,$routeParams,crud){
-   var title="Banks",profile='banks',defaultScope=dynamis.get("defaultScope",true)[profile];
+function accountsCtrl($scope,$routeParams,crud){
+   var title="Bank Account",profile='accounts',defaultScope=dynamis.get("defaultScope",true)[profile];
    defaultScope.details.jesua=$routeParams.jesua||null;
 
    crud.get($scope,title,profile,defaultScope);
@@ -100,6 +106,40 @@ function banksCtrl($scope,$routeParams,crud){
    $scope.DBset=function(field,val){return crud.DBset(field,val);}
    $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
    $scope.$on("readyForm",function(e,server){});
+}
+//============================================================================//
+function banksCtrl($scope,$routeParams,crud){
+   var title="Banks",profile='banks',defaultScope=dynamis.get("defaultScope",true)[profile];
+   defaultScope.details.jesua=$routeParams.jesua||null;
+   dynamis.set("href",{"bank":$routeParams.jesua});//storage for pettyHistory
+
+   crud.get($scope,title,profile,defaultScope);
+   $scope.submit=function(dataForm){$scope.dataForm=dataForm;crud.submit($scope,profile);}
+   $scope.delete=function(){crud.delete($scope,profile);}
+   $scope.DBenum=function(links,parent,col1,key,type){crud.DBenum(links,parent,col1,key,type)}//enum
+   $scope.DBset=function(field,val){return crud.DBset(field,val);}
+   $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
+   $scope.$on("readyForm",function(e,server){});
+}
+//============================================================================//
+function bankHistoryCtrl($scope,$routeParams,crud){
+   var title="Bank Transaction",profile='bank transaction',defaultScope=dynamis.get("defaultScope",true)[profile];
+   defaultScope.details.jesua=$routeParams.jesua||null;
+
+   crud.get($scope,title,profile,defaultScope);
+   $scope.submit=function(dataForm){
+      if(!$scope.data.jesua){$scope.data.received_by=impetroUser().operarius; $scope.data.approved_by=null;}
+      else {$scope.data.received_by=null; $scope.data.approved_by=impetroUser().operarius;}
+      $scope.data.bank_ref=dynamis.get("href").bank;//restore from bank
+      $scope.dataForm=dataForm;crud.submit($scope,profile);
+   }
+   $scope.delete=function(){crud.delete($scope,profile);}
+   $scope.DBenum=function(links,parent,col1,key,type){crud.DBenum(links,parent,col1,key,type)}//enum
+   $scope.DBset=function(field,val){return crud.DBset(field,val);}
+   $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
+   $scope.$on("readyForm",function(e,server){
+      if($scope.data.deposit) $scope.data.inOut='deposit'; else $scope.data.inOut='withdrawn';
+   });
 }
 //============================================================================//
 function suppliersCtrl($scope,$routeParams,crud){
@@ -118,11 +158,14 @@ function suppliersCtrl($scope,$routeParams,crud){
 function billsCtrl($scope,$routeParams,crud,notitia){
    var title="Approval for payments",profile='bills',defaultScope=dynamis.get("defaultScope",true)[profile];
    defaultScope.details.jesua=$routeParams.jesua||null;
-   var d=new Date();$scope.amount_due={};$scope.amount_due.minDate=d;
-   $scope.enumBanks=[{"alpha":null,"display":"None"}];if($routeParams.view==='new'){defaultScope.details.innitiator=dynamis.get("USER_NAME",true).operarius;}
+   var d=new Date();$scope.due_date={};$scope.due_date.minDate=d;
+   $scope.enumBanks=[{"alpha":null,"display":"None"}];
+   if($routeParams.view==='new'){defaultScope.details.innitiator=dynamis.get("USER_NAME",true).operarius;}
 
    crud.get($scope,title,profile,defaultScope);
-   $scope.submit=function(dataForm){defaultScope.details.jesua={"delta":"!@=!#","alpha":$routeParams.jesua};
+   $scope.submit=function(dataForm){
+      defaultScope.details.jesua={"delta":"!@=!#","alpha":$routeParams.jesua};
+      if($scope.data.jesua){defaultScope.details.approver=dynamis.get("USER_NAME",true).operarius;}
       $scope.dataForm=dataForm;
       crud.submit($scope,profile);}
    $scope.delete=function(){crud.delete($scope,profile);}
@@ -142,6 +185,44 @@ function billsCtrl($scope,$routeParams,crud,notitia){
    });
 }
 //============================================================================//
+function invoicesCtrl($scope,$routeParams,crud){
+   var title="Invoice",profile='invoices',defaultScope=dynamis.get("defaultScope",true)[profile];
+   defaultScope.details.jesua=$routeParams.jesua||null;
+   var d=new Date();$scope.due_date={};$scope.due_date.minDate=d;
+   if($routeParams.view==='new'){
+      defaultScope.details.client_name = dynamis.get("href").client;
+      defaultScope.details.innitiator=dynamis.get("USER_NAME",true).operarius;
+   }
+
+   crud.get($scope,title,profile,defaultScope);
+   $scope.submit=function(dataForm){
+      if($scope.data.expenseOthers)$scope.data.expense=$scope.data.expenseOthers;//@see function categoryOther
+      if($scope.data.revenueOthers)$scope.data.revenue=$scope.data.revenueOthers;//@see function categoryOther
+      if($scope.data.jesua){defaultScope.details.approver=dynamis.get("USER_NAME",true).operarius;}
+      $scope.dataForm=dataForm;
+      crud.submit($scope,profile);
+   }
+   $scope.delete=function(){crud.delete($scope,profile);}
+   $scope.DBenum=function(links,parent,col1,key,type){crud.DBenum(links,parent,col1,key,type)}//enum
+   $scope.DBset=function(field,val){return crud.DBset(field,val);}
+   $scope.categoryOther=function(val,revenue){
+      var tmp;
+      if(!revenue){
+         tmp = $scope.data.expense+': ';
+         $scope.data.expenseOthers = tmp.replace(/:.+/,': '+val);
+      }else{
+         tmp = $scope.data.revenue+': ';
+         $scope.data.revenueOthers = tmp.replace(/:.+/,': '+val);
+      }
+
+   }
+
+   $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
+   $scope.$on("readyForm",function(e,server){
+      if(!$scope.data.jesua)$scope.data.approver=dynamis.get("USER_NAME",true).operarius;
+   });
+}
+//============================================================================//
 function projectsCtrl($scope,$routeParams,crud){
    var title="Projects",profile='projects',defaultScope=dynamis.get("defaultScope",true)[profile];
    defaultScope.details.jesua=$routeParams.jesua||null;
@@ -156,27 +237,99 @@ function projectsCtrl($scope,$routeParams,crud){
    $scope.$on("readyForm",function(e,server){});
 }
 //============================================================================//
-function clientsCtrl(){}
+function clientsCtrl($scope,$routeParams,crud){
+   var title="Client",profile='clients',defaultScope=dynamis.get("defaultScope",true)[profile];
+   defaultScope.details.jesua=$routeParams.jesua||null;
+   dynamis.del("href");//empty href for security
+
+   crud.get($scope,title,profile,defaultScope);
+   $scope.submit=function(dataForm){$scope.dataForm=dataForm;crud.submit($scope,profile);}
+   $scope.delete=function(){crud.delete($scope,profile);}
+   $scope.DBenum=function(links,parent,col1,key,type){crud.DBenum(links,parent,col1,key,type)}//enum
+   $scope.DBset=function(field,val){return crud.DBset(field,val);}
+   $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
+   $scope.$on("readyForm",function(e,server){iyona.deb("BROADCASTING",e,server);
+      if($scope.data.jesua) dynamis.set("href",{"client":$scope.data.name});
+   });
+}
+//============================================================================//
+function pettyCtrl($scope,$routeParams,crud){
+   var title="Petty Cash",profile='petty',defaultScope=dynamis.get("defaultScope",true)[profile];
+   defaultScope.details.jesua=$routeParams.jesua||null;
+   dynamis.set("href",{"petty":$routeParams.jesua});//storage for pettyHistory
+
+   crud.get($scope,title,profile,defaultScope);
+   $scope.submit=function(dataForm){$scope.dataForm=dataForm;crud.submit($scope,profile);}
+   $scope.delete=function(){crud.delete($scope,profile);}
+   $scope.DBenum=function(links,parent,col1,key,type){crud.DBenum(links,parent,col1,key,type)}//enum
+   $scope.DBset=function(field,val){return crud.DBset(field,val);}
+   $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
+   $scope.$on("readyForm",function(e,server){});
+}
+//============================================================================//
+function pettyHistoryCtrl($scope,$routeParams,crud){
+   var title="Petty History",profile='petty history',defaultScope=dynamis.get("defaultScope",true)[profile];
+   defaultScope.details.jesua=$routeParams.jesua||null;
+
+   crud.get($scope,title,profile,defaultScope);
+   $scope.submit=function(dataForm){
+      if(!$scope.data.jesua){$scope.data.received_by=impetroUser().operarius; $scope.data.approved_by=null;}
+      else {$scope.data.received_by=null; $scope.data.approved_by=impetroUser().operarius;}
+      $scope.data.petty_ref=dynamis.get("href").petty;//restore from petty
+      $scope.dataForm=dataForm;crud.submit($scope,profile);
+   }
+   $scope.delete=function(){crud.delete($scope,profile);}
+   $scope.DBenum=function(links,parent,col1,key,type){crud.DBenum(links,parent,col1,key,type)}//enum
+   $scope.DBset=function(field,val){return crud.DBset(field,val);}
+   $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
+   $scope.$on("readyForm",function(e,server){
+      if($scope.data.deposit) $scope.data.inOut='deposit'; else $scope.data.inOut='withdrawn';
+   });
+}
 //============================================================================//
 function rptAFP($scope,$routeParams,crud,fetch){
    var title="AFP report",profile='payable',defaultScope=dynamis.get("defaultScope",true)[profile];
-   defaultScope.details.name={"delta":"!@=!#","alpha":$routeParams.jesua};
+   defaultScope.details.name={"delta":"!@=!#","alpha":$routeParams.jesua};$scope.currency='USD';
    var on=true,d=new Date();$scope.start_date={},$scope.end_date={};$scope.end_date.minDate=d;$scope.start_date.minDate=d;
 
    crud.get($scope,title,profile,defaultScope);
-   fetch.post(sessionStorage.SITE_SERVICE,{"militia":"reports-afp","jesua":$routeParams.jesua},function(server){iyona.log("DATA",server);
+   fetch.post(sessionStorage.SITE_SERVICE,{"militia":"reports-afp","jesua":$routeParams.jesua},function(server){iyona.deb("BANK",server);
       if(typeof server.bills!=="undefined"&&typeof server.bills.rows!=="undefined"){
-         $scope.opt.itemsVal = {"bills":server.bills.rows};//SETiSCROLL('#repTable');
-         if(typeof server.payable!=="undefined")$scope.data = server.payable.rows[0];
-         $scope.data.supervisor=impetroUser().operarius;
+         if(server.bills.rows){
+            $scope.opt.itemsVal = {"bills":server.bills.rows};//SETiSCROLL('#repTable');
+            var x,l=$scope.opt.itemsVal.bills.length;$scope.opt.total=0;
+            for(x=0;x<l;x++){var row=$scope.opt.itemsVal.bills[x]; if(row.payable_ref){$scope.opt.total+=parseFloat(row.amount_due);} }
+         }
+         if(typeof server.payable!=="undefined"){
+            $scope.data = server.payable.rows[0];
+            if($scope.typeahead.signature1){
+               var signature1=$scope.typeahead.signature1,signature2=$scope.typeahead.signature2,len,data,obj;
+               len=signature1.length; for(x=0;x<len;x++){obj=signature1[x]; if(obj.alpha===$scope.data.signature1){$scope.data.signature1=obj;break;} }
+               len=signature2.length; for(x=0;x<len;x++){obj=signature2[x]; if(obj.alpha===$scope.data.signature2){$scope.data.signature2=obj;break;} }
+            }
+         }
+         l=server.banks.rows.length;$scope.opt.banks={};
+         for(x=0;x<l;x++){row=server.banks.rows[x]; row.balance=row.balance||0;  $scope.opt.banks[row.jesua]=row; }
+         iyona.deb("BACK",$scope.opt.banks);
+         $scope.data.accountant=impetroUser().operarius;
          $scope.data.created=d;
+         if($scope.opt.total>0){$scope.opt.account="#ACC001";}
       }else{
          iyona.msg("No result found");$scope.data.msg="There was no record found on the server.";
       }
    });
-   $scope.submit=function(dataForm){defaultScope.details.jesua={"delta":"!@=!#","alpha":$routeParams.jesua};$scope.dataForm=dataForm;crud.submit($scope,profile);}
+   $scope.submit=function(dataForm){
+      defaultScope.details.jesua={"delta":"!@=!#","alpha":$routeParams.jesua};
+      $scope.dataForm=dataForm;
+      crud.submit($scope,profile);}
    $scope.delete=function(){crud.delete($scope,profile);}
    $scope.order=function(ord){$scope.ord=ord;}
+   $scope.sum=function(amount,ref,cur){
+      $scope.currency=cur;
+      if(ref==null||ref==0)$scope.opt.total+=parseFloat(amount);
+      else if($scope.opt.total>0)$scope.opt.total-=parseFloat(amount);
+      iyona.deb($scope.opt.total,ref);
+   }
    $scope.checkAll=function(){iyona.log("clicked...")
       if(typeof $scope.opt.itemsVal!=="undefined"&&typeof $scope.opt.itemsVal.bills!=="undefined"){
          var row,x,l=$scope.opt.itemsVal.bills.length;
@@ -187,4 +340,31 @@ function rptAFP($scope,$routeParams,crud,fetch){
          }
       }
    }
+   $scope.$on("readyForm",function(e,data){
+      var now = new Date().format("isoDateTime");
+      $scope.date.created = now;
+   });
+   $scope.$on("readyTypeahead",function(e,data){
+      //search object signatures for value to be selected
+      var len,x,obj;
+      if(typeof data.signature1!="undefined"){ len=data.signature1.length; for(x=0;x<len;x++){obj=data.signature1[x]; if(obj.alpha===$scope.data.signature1){$scope.data.signature1=obj;break;} } }
+      if(typeof data.signature2!="undefined"){ len=data.signature2.length; for(x=0;x<len;x++){obj=data.signature2[x]; if(obj.alpha===$scope.data.signature2){$scope.data.signature2=obj;break;} } }
+   });
 }
+//============================================================================//
+function tabularCtrl($scope,crud,$routeParams,fetch,$timeout){
+   var title="ADSL Customers",profile='system reports',defaultScope=dynamis.get("defaultScope",true)[profile];
+   var month = new Date().getMonth()+1,view=$routeParams.view,jesua=$routeParams.jesua;
+   $scope.sorts=[{"name":"By Accounts","key":"account"},{"name":"By Size","key":"total"},{"name":"By Status","key":"status"}];$scope.sortable=null;$scope.reverse=false;
+
+   crud.get($scope,title,profile,defaultScope);
+   $scope.submit=function(dataForm){$scope.dataForm=dataForm;}
+   $scope.delete=function(){$scope.data.name.delta=null;crud.delete($scope,profile);}
+   $scope.DBenum=function(links,parent,col1,key,type){crud.DBenum(links,parent,col1,key,type)}//enum
+   $scope.DBset=function(field,val){return crud.DBset(field,val);}
+   $scope.arrange=function(sort){$scope.sortable=sort;$scope.reverse=!$scope.reverse;}
+   $scope.licentia=getLicentia();$scope.prima=impetroUser().jesua;
+   $scope.$on("readyForm",function(e,server){});
+   $scope.$on("readyList",function(e,server){});
+}//function
+//============================================================================//

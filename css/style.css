@@ -307,6 +307,8 @@
 
 				font-size: .6em;
 				line-height: 2em;
+				padding-left: 2px;
+				color: #000;
 }
 
 			form input.text,

@@ -26,7 +26,7 @@ iyona={
          else if (typeof arguments[x]==="object") {for (var index in arguments[x]); console.log(arguments[x][index])}
          else console.log(arguments[x]);}},/*for workers or gap application display objects*/
    log:function(){if(iyona.enableLog){console.log('%c'+arguments[0],'background:#2d79aa;color:#d9edf7;width:100%;display:block;font-weight:bold;',arguments);}},/*notification msg for the log and all set var*/
-   msg:function(msg,permanent,clss,opt){if(iyona.view){console.log(arguments);clss=clss||'';_$("#notification").html(msg).removeClass().addClass('blink_me '+clss);if(permanent!==true)setTimeout(function(){_$("#notification").html("...").removeClass('blink_me');},5000); }},/*debug msg and all set var*/
+   msg:function(msg,permanent,clss,opt){if(iyona.view){console.log(arguments);clss=clss||'';_$("#notification span").html(msg).removeClass().addClass('blink_me '+clss);if(permanent!==true)setTimeout(function(){_$("#notification span").html("...").removeClass('blink_me');},5000); }},/*debug msg and all set var*/
    deb:function(){if(iyona.view){if(!PASCO||true){arguments[arguments.length++]=this.pup();this.pop.apply(console,arguments);}else{this.obj(arguments);} }}/*break down all set var into arr, custom debug msg re-created*/
 }
 //============================================================================//STORAGE
@@ -553,27 +553,18 @@ function checkConnection() {
    return Array('Connection type is ' + states[networkState],networkState);
 }
 //============================================================================//
-/*
+/**
  * use prototype to add a function that searches an object value
  * @author fredtma
  * @version 2.3
  * @category search, object
+ * @param array </var>value</var> the value to search in the object
  * @return bool
  */
-objSearch = function(ele,value){
-   var key,l,found=false,obj;
-   if(ele instanceof Array){
-      l=ele.length;
-      for(key=0;key<l;key++){obj=ele[key];
-         if(typeof obj==='object' )found=objSearch(obj,value);
-         if(found!==false) return [found,key];
-         if(typeof obj==="string"&&obj.indexOf(value)!==-1 ) return [ele,key];
-      }
-   }
-    for(key in ele ) {obj=ele[key];
-        if(typeof obj==='object' )found=objSearch(obj,value);
-        if(found!==false) return [found,key];
-        if(typeof obj==="string"&&obj.indexOf(value)!==-1 ) return [ele,key];
+objSearch = function(obj,value){
+    for( var key in obj ) {
+        if(typeof obj[key]==='object' )objSearch(obj[key],value);
+        if(typeof obj[key]==="string"&&obj[key].indexOf(value)!==-1 ) return obj;
     }
     return false;
 }
@@ -621,23 +612,6 @@ function SETiSCROLL (id) {id=id||"#mainContent";return;
  */
 function getLicentia(perm) {
    return impetroUser().licencia;
-}
-//============================================================================//
-/**
- * creates a unique id based upon time
- * @author fredtma
- * @version 1.2
- * @category random,generation
- */
-function uRand() {
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-    d = new Date(),text=d.getDate()+d.getMonth();
-
-    for( var i=0; i < 5; i++ ){
-       text += possible.charAt(Math.floor(Math.random() * possible.length));
-       if(i%2 && i!=0) text+=Math.floor(Math.random() * 90)+10;
-    }
-    return text;
 }
 //============================================================================//
 //GOOGLE API USER DETAILS                                                     //

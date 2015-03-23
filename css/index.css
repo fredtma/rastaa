@@ -1,14 +1,17 @@
 /******************************************************************************/
 /*TAGS*/
-html,body{height:100%;margin:0px;padding:0px;width:100%;}
+html,body{height:100%;margin:0px;padding:0px;width:100%;overflow-y: hidden;}
 a:hover{text-decoration: none;}
-small{font-size: 0.55em;}
+small{font-size: 0.7em;color: #000;}
 @font-face {font-family: 'Roboto Condensed';font-style: normal;font-weight: 400;src: local('Roboto Condensed Regular'), local('RobotoCondensed-Regular'), url(../fonts/2UX7WLTfW3W8TclTUvlFyQ.woff) format('woff');}
 @font-face {font-family: 'Yanone Kaffeesatz';font-style: normal;font-weight: 400;src: local('Yanone Kaffeesatz Regular'), local('YanoneKaffeesatz-Regular'), url(../fonts/YDAoLskQQ5MOAgvHUQCcLRTHiN2BPBirwIkMLKUspj4.woff) format('woff');}
 /******************************************************************************/
 /*CLASSES*/
 .slide-animate-container {position:relative;overflow:hidden;border:0px solid black;}
-.slide-animate {}
+.slide-animate {
+    overflow-y: auto;
+    height: 600px;
+}
 .slide-animate.ng-enter, .slide-animate.ng-leave {transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;-webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;
   position:absolute;top:0;left:0;right:0;bottom:0;display:block;}
 .slide-animate.ng-enter {top:-100%;}
@@ -81,3 +84,8 @@ form input,form textarea {color:#000;}
 .cnt {width:1em;} .opt {width:8%;}
 .small-row {line-height: 1.2em; }
 .borderless {border:none;background: transparent;line-height: 1em;padding: 0px 8px;height: 2em;}
+.payableH5 {
+    display: inline-block;
+    font-weight: bold;
+    color: #000;
+}

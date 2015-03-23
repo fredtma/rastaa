@@ -1,56 +1,118 @@
 <article  ng-controller="clientsCtrl">
-   <section id="listView" ng-if="view=='all'">
-      <header class="menuHeader"><ol class="breadcrumb"><li><a href="#genesis">Home</a></li><li class="active">{{menu.list[0].name}}</li></ol><a ng-if="licentia.Alpha" ng-href="{{menu.list[0].url}}" class="glyphicon glyphicon-plus success"></a></header>
-      <section id="mainContent" class="div-striped-">
-         <div class="row numbers-items" ng-repeat="row in data">
-            <div class="col-xs-1">
-               <span ng-class="'item-icon glyphicon glyphicon-briefcase success'"></span>
-            </div>
-            <div class="col-xs-11">
-               <a href="#numbers/clients/{{row.name}}/details">
-                  <h4>
-                     {{row.name}}
-                  </h4>
-                  <small><span ng-if='row.code'>{{row.code}}.</span> <span ng-if='row.desc'>{{row.desc|limitTo:15}}...</span></small>
-               </a>
-            </div>
-         </div>
+   <section id="listView" ng-if="view=='list'">
+      <section id="mainContent" class="listing">
+         <ul class="list-group profile-listing">
+            <li class=" " ng-repeat="row in data">
+               <div class="cols1">
+                  <span ng-class="'item-icon fa fa-group'" style="color:#0000ff"></span>
+               </div>
+               <div class="cols2">
+                  <a href="#clients/view/{{row.jesua}}">
+                     <h4>{{row.name}}</h4>
+                     <small>
+                        <span ng-if='row.description'>{{row.description}},</span>&nbsp;&nbsp;&nbsp;
+                        <span ng-if='row.tel'>{{row.tel}} </span>
+                     </small>
+                  </a>
+               </div>
+            </li>
+         </ul>
       </section>
    </section>
-   <section id="detailView"  ng-if="view=='details'">
-      <header class="menuHeader"><ol class="breadcrumb"><li><a href="#genesis">Home</a></li><li><a ng-href="{{menu.details[0].url}}">{{menu.details[0].name}}</a></li><li class="active">{{data.name||"New"}} {{menu.details[1].name}}</li></ol><a ng-if="licentia.Alpha" ng-href="{{menu.list[0].url}}" class="glyphicon glyphicon-plus success"></a><a ng-if="licentia.omegA" href="javascript:void(0)" ng-click="delete()" class="glyphicon glyphicon-remove danger"></a></header>
-      <section class="">
-         <form id="clientForm" ng-submit="submit(dataForm)" name='dataForm'>
-            <input type="hidden" class="form-control" ng-model="data.jesua" />
-         <div id='srvModified1' class="input-group">
-            <span class="input-group-addon glyphicon glyphicon-calendar"></span>
-            <output class="form-control" ng-model="data.modified"  >{{data.modified}}</output>
-         </div>
-         <div id='srvModified' class="input-group">
-            <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
-            <input type="text" class="form-control" required placeholder="Client's name" title="Client's name" autofocus name="name" ng-model="data.name" />
-         </div>
-         <div id='srvModified' class="input-group">
-            <span class="input-group-addon glyphicon glyphicon-barcode"></span>
-            <input type="text" class="form-control" required placeholder="Unique company code" title="Unique company code" name="code" ng-model="data.code" />
-         </div>
-         <div id='srvModified' class="input-group">
-            <span class="input-group-addon glyphicon glyphicon-align-left"></span>
-            <input type="text" class="form-control" placeholder="Company desscription" title="Company desscription" name="desc" ng-model="data.desc" />
-         </div>
-         <div ng-if="opt.reference" ng-repeat="(key,links) in opt.reference" >
-            <h4 class="refSection">{{opt.foreign[key].title}}</h4>
-            <div id='srvModified' class="input-group btn-group" data-toggle="buttons" ng-init="col1=opt.foreign[key].col1;col2=opt.foreign[key].col2;parent=data[opt.foreign[key].parent];type=opt.foreign[key].type;">
-               <span class="input-group-addon glyphicon glyphicon-book"></span>
-               <lable ng-repeat="(k,link) in links.rows" ng-init="temp=link[col1]" ng-class="'btn btn-primary '+{true:'active'}[temp!=null]" ng-click="DBenum(links,parent,col1,k,type); ">
-                  <input type="{{type||'checkbox'}}" name="title" ng-model="link[col2]" ng-value="true" />{{link[col2]}}</lable>
+   <section id="detailView"  ng-if="view=='new'||view=='view'">
+      <section class=""><span id="messager" ng-class="'help-block '+{true:'text-danger',false:'text-info'}[err]" ng-show="msg">{{msg}}</span>
+         <form id="dataForm" ng-submit="submit(dataForm)" name='dataForm'>
+         <input type="hidden" class="form-control" ng-model="data.jesua" />
+         <input type="hidden" class="form-control" ng-model="data.modified" />
+         <input type="hidden" class="form-control" ng-model="data.category" />
+         <div class="form-group">
+            <label for="name" >Client Name</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.name]">
+                  <span class="input-group-addon glyphicon glyphicon-qrcode"></span>
+                  <input type="text" class="form-control" required autocomplete="off" placeholder="Client Name" title="Client Name" autofocus id="name" name="name" ng-model="data.name" />
+               </div>
             </div>
          </div>
-         <div id='srvModified' class="input-group">
-            <button ng-if="licentia.deLta||true" type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
+         <div class="form-group">
+            <label for="code" >Client's Code</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.code]">
+                  <span class="input-group-addon glyphicon glyphicon-barcode"></span>
+                  <input type="text" class="form-control" required placeholder="Client's code" title="Client's code" name="code" id='code' ng-model="data.code" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="email" >Email</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.email]">
+                  <span class="input-group-addon glyphicon glyphicon-envelope"></span>
+                  <input type="email" class="form-control" required placeholder="Email address" title="Email address" name="email" id="email" ng-model="data.email"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="tel" >Contact number</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.tel]">
+                  <span class="input-group-addon glyphicon glyphicon-phone"></span>
+                  <input type="tel" class="form-control" required placeholder="Contact number" title="Contact number" name="tel" id="tel" ng-model="data.tel"  />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="description" >Description</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.description]">
+                  <span class="input-group-addon glyphicon glyphicon-pushpin"></span>
+                  <textarea class="form-control" required placeholder="Supplier's description" title="Supplier's description" name="description" id="description" ng-model="data.description">
+                  </textarea>
+               </div>
+            </div>
+         </div>
+         <div class="form-group" ng-if="opt.reference">
+            <h4 class="refSection">{{opt.foreign[key].title}}</h4>
+            <div>
+               <div ng-repeat="(key,links) in opt.reference" >
+                  <div class="input-group btn-group" data-toggle="buttons" ng-init="col1=opt.foreign[key].col1;col2=opt.foreign[key].col2;parent=data[opt.foreign[key].parent];type=opt.foreign[key].type;">
+                     <span class="input-group-addon glyphicon glyphicon-book"></span>
+                     <lable ng-repeat="(k,link) in links.rows" ng-init="temp=link[col1]" ng-class="'btn btn-primary '+{true:'active'}[temp!=null]" ng-click="DBenum(links,parent,col1,k,type); ">
+                        <input type="{{type||'checkbox'}}" name="title" ng-model="link[col2]" ng-value="true" />{{link[col2]}}</lable>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div ng-if="licentia.deLta||data.jesua==prima" ng-class="'input-group '+{true:'has-error'}[errMsg.firstname]">
+            <button type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
          </div>
          </form>
-      </section>
+         <hr/>
+         <div ng-if="data.jesua" ng-repeat="(ref,lists) in opt.listsConf" class="table-responsive panel panel-primary">
+            <div class="panel-heading"><h3 class="panel-title">{{lists.title}}. &nbsp;&nbsp;<small class="white" ng-show="!opt.listsVal">Click the bill below to see more details</small> </h3></div>
+            <div class="panel-body">
+               <table class="table table-hover table-condensed table-dynamic table-list">
+                  <thead>
+                     <tr>
+                        <th>#</th><th>Invoice</th><th>Amount Due</th><th>Due Date</th><th>Status</th><th width='5%'><a href='#invoices/new' class="glyphicon glyphicon-plus text-info" title="Add a new item"></a></th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr ng-repeat="(key,list) in opt.listsVal[ref]">
+                        <td>{{key+1}}</td>
+                        <td><a href="#invoices/view/{{list.jesua}}" class="link" >{{list.name}} {{list.transaction_number}}</a></td>
+                        <td><a href="#invoices/view/{{list.jesua}}" class="link" >{{list.amount_due}} {{list.currency}}</a></td>
+                        <td><a href="#invoices/view/{{list.jesua}}" class="link" >{{list.due_date}}</a></td>
+                        <td><a href="#invoices/view/{{list.jesua}}" class="link" >{{list.status}}</a></td>
+                     </tr>
+                  </tbody>
+                  <tfoot>
+                     <tr><td colspan="5">&nbsp;<a href="#invoices/new" class="glyphicon glyphicon-plus text-info link" title="Add a new item">&nbsp;Click here to add new invoice.</a></td></tr>
+                  </tfoot>
+               </table>
+            </div>
+         </div>
+      </section><small ng-show="false">{{data|json}} <hr/> {{btnClass|json}} <hr/> {{opt|json}}</small>
    </section>
-   <small ng-show="!PASCO">{{data|json}} <hr/>{{opt.reference|json}}</small>
+
 </article>

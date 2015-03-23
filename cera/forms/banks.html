@@ -11,7 +11,7 @@
                   <h4>
                      {{row.name}}
                   </h4>
-                  <small><span ng-if='row.code'>{{row.code}}, &nbsp;&nbsp;</span> <span ng-if='row.account_number'>{{row.account_number}}.</span></small>
+                  <small><span ng-if='row.code' ng-bind="'Banch Code: '+row.code+' &nbsp;&nbsp;'"></span> <span ng-if='row.account_number' ng-bind="'Account Number: '+row.account_number"></span> <span ng-if='row.balance' ng-bind="row.ballance+' '+row.currency"></span></small>
                </a>
             </div>
          </li>
@@ -23,15 +23,6 @@
          <form id="dataForm" ng-submit="submit(dataForm)" name='dataForm'>
          <input type="hidden" class="form-control" ng-model="data.jesua" />
          <input type="hidden" class="form-control" ng-model="data.modified" />
-         <div class="form-group">
-            <label for="supplier_name" >Supplier's Name</label>
-            <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.supplier_name]">
-                  <span class="input-group-addon fa fa-group"></span>
-                  <input type="text" class="form-control" required placeholder="The Supplier Name" title="The Supplier Name" id="supplier_name" name="supplier_name" ng-model="data.supplier_name"  typeahead="value as value.display for value in typeahead.supplier_name | filter:{display:$viewValue} | limitTo:5" autofocus/>
-               </div>
-            </div>
-         </div>
          <div class="form-group">
             <label for="name" >Bank's Name</label>
             <div>
@@ -60,15 +51,6 @@
             </div>
          </div>
          <div class="form-group">
-            <label for="address" >Address</label>
-            <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.address]">
-                  <span class="input-group-addon fa fa-align-justify"></span>
-                  <textarea type="address" class="form-control" required placeholder="Address" title="Address" id="address" name="address" ng-model="data.address"  /></textarea>
-               </div>
-            </div>
-         </div>
-         <div class="form-group">
             <label for="account_number" >Account Number</label>
             <div>
                <div ng-class="'input-group '+{true:'has-error'}[errMsg.account_number]">
@@ -78,29 +60,11 @@
             </div>
          </div>
          <div class="form-group">
-            <label for="aba" >Bank ABA</label>
+            <label for="address" >Description</label>
             <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.aba]">
-                  <span class="input-group-addon fa fa-th"></span>
-                  <input type="text" class="form-control" required placeholder="Bank ABA" title="Bank ABA" id="aba" name="aba" ng-model="data.aba"  />
-               </div>
-            </div>
-         </div>
-         <div class="form-group">
-            <label for="aba" >Bank Wire Routing</label>
-            <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.wire_routing]">
-                  <span class="input-group-addon fa fa-exchange"></span>
-                  <input type="text" class="form-control" required placeholder="Bank Wire Routing" title="Bank Wire Routing" id="wire_routing" name="wire_routing" ng-model="data.wire_routing" />
-               </div>
-            </div>
-         </div>
-         <div class="form-group">
-            <label for="iban" >IBAN</label>
-            <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.iban]">
-                  <span class="input-group-addon fa fa-bar-chart-o"></span>
-                  <input type="text" class="form-control" required placeholder="Bank IBAN" title="Bank IBAN" id="iban" name="iban" ng-model="data.iban" />
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.address]">
+                  <span class="input-group-addon fa fa-align-justify"></span>
+                  <textarea class="form-control" placeholder="description" title="description" id="address" name="description" ng-model="data.description"  /></textarea>
                </div>
             </div>
          </div>
@@ -110,6 +74,15 @@
                <div ng-class="'input-group '+{true:'has-error'}[errMsg.country]">
                   <span class="input-group-addon fa fa-flag"></span>
                   <input type="text" class="form-control" required placeholder="Bank's Original Country" id="country" title="Country From" name="country" ng-model="data.country" />
+               </div>
+            </div>
+         </div>
+         <div class="form-group">
+            <label for="balance" >Account Ballance</label>
+            <div>
+               <div ng-class="'input-group '+{true:'has-error'}[errMsg.balance]">
+                  <span class="input-group-addon fa fa-group"></span>
+                  <output class="form-control" title="The banks balance" id="balance" name="balance" >{{data.balance}}</output>
                </div>
             </div>
          </div>
@@ -129,6 +102,32 @@
             <button type="submit" ng-class="btnClass" name="submit" >{{btn}}</button>
          </div>
          </form>
-      </section><small ng-show="false">{{data|json}} <hr/> {{btnClass|json}} <hr/> {{opt|json}}</small>
+         <div ng-repeat="(ref,lists) in opt.listsConf" ng-if="data.jesua" class="table-responsive panel panel-primary">
+            <div class="panel-heading"><h3 class="panel-title">{{lists.title}}. <small class="white" ng-show="!opt.listsVal">Click on the add(+) icon to add new items</small> </h3></div>
+            <div class="panel-body">
+               <table class="table table-hover table-condensed table-dynamic table-list">
+                  <thead>
+                     <tr>
+                        <th>#</th><th>Receipt</th><th>Date</th><th>Amount</th><th>Receiver</th><th>Approver</th><th width='5%'><a href='#bankHistory/new' class="glyphicon glyphicon-plus text-info" title="Add a new item"></a></th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr ng-repeat="(key,list) in opt.listsVal[ref]">
+                        <td>{{key+1}}</td>
+                        <td><a href="#bankHistory/view/{{list.jesua}}" >{{list.receipt_no}}</a></td>
+                        <td><a href="#bankHistory/view/{{list.jesua}}" >{{list.modified}}</a></td>
+                        <td><a href="#bankHistory/view/{{list.jesua}}" >{{list.withdrawn?'- '+list.withdrawn:'+ '+list.deposit}} {{list.currency}}</a></td>
+                        <td><a href="#bankHistory/view/{{list.jesua}}" >{{list.received_by}}</a></td>
+                        <td><a href="#bankHistory/view/{{list.jesua}}" >{{list.approved_by}}</a></td>
+                        <td><a href="#bankHistory/view/{{list.jesua}}" >View</a></td>
+                     </tr>
+                  </tbody>
+                  <tfoot>
+                     <tr><td colspan="7">&nbsp;<a href="#bankHistory/new" class="glyphicon glyphicon-plus text-info link" title="Add a new item">&nbsp;Click here to add new transaction.</a></td></tr>
+                  </tfoot>
+               </table>
+            </div>
+         </div>
+      </section>
    </section>
 </article>

@@ -1,0 +1,36 @@
+<article ng-controller="tabularCtrl">
+   <section id="reportView"  ng-if="view=='reports'">
+      <header class="menuHeader">
+         <ol class="breadcrumb">
+            <li><a href="#genesis">Home</a></li>
+            <li ng-repeat="m in menu" class="m.class" ><a href="{{m.link}}" ng-bind="m.text"></a></li>
+            <li class="menu-icon" ng-if="crud.alpha"><a ng-if="licentia.Alpha" ng-href="{{crud.alpha}}" class="glyphicon glyphicon-plus success"></a></li>
+         </ol>
+      </header>
+      <section  class='listContainer adsl scrollerContainer'>
+         <canvas id="canvas" width="1600" height="700"></canvas>
+         <div id="legends">
+            <span ng-repeat="key in opt.legend" class="label label-default" ng-style="{background:opt.strokeColor[$index]}" ng-bind="key" ></span>
+         </div>
+         <h3 class="reports" ng-bind="opt.graphTitle"></h3>
+         <hr/>
+         <table class="table table-striped table-hover table-condensed " style="font-size:0.8em;">
+             <thead>
+               <tr>
+                  <th ng-repeat="set in table.title"><a class="link" ng-click="arrange(set.key)" ng-bind="set.title"></a></th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr ng-repeat="row in data  | filter:inputSearch | orderBy:sortable:reverse">
+                  <td ng-repeat="set in table.title" ng-bind-html="row[set.key]|display:set.display"></td>
+               </tr>
+            </tbody>
+            <tfoot>
+               <tr>
+                  <td ng-repeat="title in table.title"></td>
+               </tr>
+            </tfoot>
+         </table>
+      </section>
+   </section>
+</article>

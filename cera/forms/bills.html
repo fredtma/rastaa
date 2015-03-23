@@ -11,7 +11,7 @@
                   <h4>
                      {{row.project_name}} <small>{{row.supplier_name}}</small>
                   </h4>
-                  <small><span ng-if='row.transaction_number'>{{row.transaction_number}}, </span> <span ng-if='row.amount_due'>{{row.amount_due}},</span> <span ng-if='row.date_due'>{{row.date_due}}.</span></small>
+                  <small><span ng-if='row.amount_due'>{{row.amount_due}},</span> <span ng-if='row.date_due'>{{row.date_due}}.</span></small>
                </a>
             </div>
          </li>
@@ -61,15 +61,6 @@
             </div>
          </div>-->
          <div class="form-group">
-            <label for="transaction_number" >Transaction Number</label>
-            <div>
-               <div ng-class="'input-group '+{true:'has-error'}[errMsg.transaction_number]">
-                  <span class="input-group-addon glyphicon glyphicon-tags"></span>
-                  <input type="text" class="form-control" required placeholder="AFP Transaction Number" title="AFP Transaction Number" name="transaction_number" id="transaction_number" ng-model="data.transaction_number"  />
-               </div>
-            </div>
-         </div>
-         <div class="form-group">
             <label for="amount_due" >Amount Due</label>
             <div>
                <div ng-class="'input-group '+{true:'has-error'}[errMsg.amount_due]">
@@ -78,7 +69,7 @@
                </div>
             </div>
          </div>
-         <div class="form-group">
+         <div class="form-group" ng-if="data.jesua">
             <label for="amount_paid" >Amount Paid</label>
             <div>
                <div ng-class="'input-group '+{true:'has-error'}[errMsg.amount_paid]">
